@@ -1,0 +1,2 @@
+-r .claude/skills/draw/scripts/requirements.txt
+pytest>=8

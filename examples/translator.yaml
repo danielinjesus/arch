@@ -1,0 +1,69 @@
+# Live Translator (github.com/danielinjesus/translator): core entities only.
+# Render: python .claude/skills/draw/scripts/draw.py examples/translator.yaml
+title: Live Translator
+subtitle: 유튜브 링크 하나 → 실시간 자막(최대 3개 언어) + 화자를 닮은 더빙
+note: 자막은 바로 뜨고, 에이전트가 다듬은 문장이 약 1초 뒤 바뀐다. 에이전트·더빙이 느려도 자막은 멈추지 않는다.
+
+groups:
+  foundry: {label: Microsoft Foundry, color: purple}
+
+nodes:
+  viewer:
+    label: 시청자
+    icon: user
+    tech: Chrome · Edge
+    role: 링크를 붙여넣고 자막을 본다
+  page:
+    label: 공개 페이지
+    icon: browser
+    tech: Azure Static Web Apps
+    role: /4 영상 번역, /5 통역 화면
+    doc: https://learn.microsoft.com/azure/static-web-apps/overview
+  tunnel:
+    label: 터널
+    icon: tunnel
+    tech: Cloudflare Tunnel
+    role: 포트를 열지 않고 집 PC를 https로 연결
+    doc: https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/
+  server:
+    label: 홈 서버
+    icon: house
+    tech: FastAPI · 윈도우 PC
+    role: 시청자마다 자막·더빙 파이프라인을 돌린다
+    doc: https://fastapi.tiangolo.com/advanced/websockets/
+  youtube:
+    label: 유튜브
+    icon: video
+    tech: yt-dlp · ffmpeg
+    role: 라이브·VOD 오디오를 16kHz PCM으로
+    doc: https://github.com/yt-dlp/yt-dlp
+  speech:
+    label: 음성 번역
+    icon: mic
+    tech: Azure Speech
+    role: 말을 문장으로 끊고 바로 번역
+    group: foundry
+    doc: https://learn.microsoft.com/azure/ai-services/speech-service/speech-translation
+  agent:
+    label: AI 에이전트
+    icon: robot
+    tech: Agent Framework
+    role: 용어집을 만들고 자막을 다듬는다
+    group: foundry
+    doc: https://learn.microsoft.com/agent-framework/overview/
+  dubbing:
+    label: 더빙
+    icon: speaker
+    tech: ElevenLabs → Grok → Azure
+    role: 화자 음높이에 맞는 목소리 선택
+    doc: https://elevenlabs.io/docs/overview/capabilities/text-to-speech
+
+edges:
+  - viewer -> page: {label: 링크 붙여넣기, step: 1}
+  - page <-> tunnel: {label: WebSocket, step: 2}
+  - tunnel <-> server: 요청 전달
+  - server -> youtube: {label: 오디오 받기, step: 3}
+  - server <-> speech: {label: 음성 → 자막, step: 4}
+  - server <-> agent: {label: 문장 다듬기, step: 5}
+  - server <-> dubbing: {label: 문장 → 음성, step: 6}
+  - page -> viewer: {label: 자막·더빙 재생, step: 7}

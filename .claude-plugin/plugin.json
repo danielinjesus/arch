@@ -1,0 +1,10 @@
+{
+  "name": "arch",
+  "displayName": "Arch: cartoon architecture diagrams",
+  "version": "0.1.0",
+  "description": "Draws colourful cartoon architecture diagrams (HTML with doc links, SVG, PNG) from the core entities of a codebase or cloud deployment.",
+  "author": { "name": "danielinjesus" },
+  "repository": "https://github.com/danielinjesus/arch",
+  "keywords": ["architecture", "diagram", "azure", "svg", "png"],
+  "skills": ["./.claude/skills/"]
+}

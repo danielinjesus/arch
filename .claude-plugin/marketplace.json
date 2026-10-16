@@ -1,0 +1,12 @@
+{
+  "name": "arch",
+  "description": "Cartoon architecture diagrams for Claude Code",
+  "owner": { "name": "danielinjesus" },
+  "plugins": [
+    {
+      "name": "arch",
+      "source": "./",
+      "description": "Draw a colourful architecture diagram of a repo or Azure deployment: /arch:draw"
+    }
+  ]
+}
