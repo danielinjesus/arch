@@ -32,7 +32,7 @@ _PLAYWRIGHT = ["/opt/pw-browsers/chromium-*/chrome-linux/chrome",
 
 
 def find_browser() -> str | None:
-    env = os.environ.get("ARCH_BROWSER")
+    env = os.environ.get("VIS_BROWSER") or os.environ.get("ARCH_BROWSER")
     if env:
         return env
     for name in _NAMES:
@@ -51,13 +51,24 @@ def find_browser() -> str | None:
 def svg_to_png(svg_text: str, width: float, height: float, out: Path, scale: float = 2.0,
                browser: str | None = None) -> None:
     """Raises RuntimeError with a hint when no browser is found or the screenshot fails."""
+    _shoot(svg_text, "diagram.svg", width, height, out, scale, browser)
+
+
+def html_to_png(html_text: str, width: float, height: float, out: Path, scale: float = 2.0,
+                browser: str | None = None) -> None:
+    """Screenshot of a whole page at width x height (its first screen as it opens)."""
+    _shoot(html_text, "page.html", width, height, out, scale, browser)
+
+
+def _shoot(text: str, name: str, width: float, height: float, out: Path, scale: float,
+           browser: str | None) -> None:
     browser = browser or find_browser()
     if not browser:
-        raise RuntimeError("no Chrome/Edge/Chromium found for the PNG; set ARCH_BROWSER to its path")
+        raise RuntimeError("no Chrome/Edge/Chromium found for the PNG; set VIS_BROWSER to its path")
     out = Path(out).resolve()
     with tempfile.TemporaryDirectory() as tmp:
-        src = Path(tmp) / "diagram.svg"
-        src.write_text(svg_text, encoding="utf-8")
+        src = Path(tmp) / name
+        src.write_text(text, encoding="utf-8")
         args = [browser, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--mute-audio",
                 "--no-first-run", "--no-default-browser-check", f"--user-data-dir={Path(tmp) / 'profile'}",
                 f"--window-size={int(round(width))},{int(round(height)) + _EXTRA_H}",

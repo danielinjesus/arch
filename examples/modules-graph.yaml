@@ -1,0 +1,38 @@
+kind: graph
+title: How vis is built
+subtitle: modules and what calls what
+groups:
+  entry: {label: Entry, color: orange}
+  arch: {label: archdraw, color: sky}
+  vis: {label: visdraw, color: purple}
+nodes:
+  vis_py: {label: vis.py, group: entry, size: 2, note: The one command. Reads the spec's kind.}
+  vcli: {label: visdraw.cli, group: vis, size: 2, note: Picks the builder or hands arch specs to archdraw.}
+  common: {label: common, group: vis, note: "Reading specs, colours, the page shell."}
+  xref: {label: xref, group: vis}
+  mindmap: {label: mindmap, group: vis}
+  graph: {label: graph, group: vis}
+  acli: {label: archdraw.cli, group: arch, size: 2}
+  spec: {label: spec, group: arch}
+  layout: {label: layout, group: arch}
+  route: {label: route, group: arch}
+  render: {label: render, group: arch}
+  png: {label: png, group: arch, note: "Headless Chrome, Edge or Chromium screenshots."}
+  palette: {label: palette, group: arch}
+edges:
+  - vis_py -> vcli: runs
+  - vcli -> acli: kind arch
+  - vcli -> xref: builds
+  - vcli -> mindmap: builds
+  - vcli -> graph: builds
+  - vcli -> png: html to png
+  - xref -> common
+  - mindmap -> common
+  - graph -> common
+  - common -> palette: colours
+  - acli -> spec: parses
+  - acli -> layout
+  - layout -> route
+  - route -> render
+  - acli -> png: svg to png
+  - render -> palette

@@ -1,0 +1,31 @@
+kind: mindmap
+title: Which picture?
+subtitle: the four kinds of vis, and when each one fits
+root:
+  label: vis
+  children:
+    - label: arch
+      note: Cartoon architecture diagram. HTML with doc links, SVG and PNG for slides and posts.
+      children:
+        - Core entities as icons
+        - Arrows say what each does to the other
+        - Groups for places (home PC, cloud)
+    - label: xref
+      note: Categories down the side, tags across the top. For rules spread over many chapters.
+      children:
+        - Matrix of categories × tags
+        - Relation graph (two columns)
+        - Category tree
+        - Tag list with criteria
+    - label: mindmap
+      note: A collapsible tree for an outline, a course map or a brainstorm.
+      children:
+        - Click to open or close
+        - Search opens the path to a match
+        - Expand by level
+    - label: graph
+      note: A network where nothing is above anything else.
+      children:
+        - Drag, pan, zoom
+        - Click a node for its links
+        - Hide a group from the legend

@@ -1,0 +1,51 @@
+# A made-up company handbook: rules of one kind (deadlines, amounts...) are spread over many chapters.
+kind: xref
+title: Handbook rules map
+subtitle: chapters down the side, cross-cutting rules across the top (example data)
+steps:
+  - {label: Documents, sub: the handbook}
+  - {label: Taxonomy, sub: chapters + criteria, here: true}
+  - {label: Tagging, sub: 1..n tags per rule, here: true}
+  - {label: Cross reference, sub: same tag together, here: true}
+  - {label: Review, sub: check a draft}
+categories:
+  - group: People
+    items:
+      - {id: onboard, prefix: "1", label: Onboarding, meta: 4 rules, children: [First day, Accounts, Buddy]}
+      - {id: leave, prefix: "2", label: Leave, meta: 3 rules, children: [Annual, Sick, Parental]}
+  - group: Money
+    items:
+      - {id: expense, prefix: "3", label: Expenses, meta: 5 rules, children: [Receipts, Limits, Approval]}
+      - {id: travel, prefix: "4", label: Travel, meta: 4 rules, children: [Booking, Per diem]}
+  - group: Safety
+    items:
+      - {id: security, prefix: "5", label: Security, meta: 3 rules, children: [Devices, Passwords]}
+tags:
+  - group: Time
+    color: sky
+    items:
+      - {id: deadline, name: Deadline, criteria: a rule that says by when something must be done}
+      - {id: notice, name: Notice period, criteria: how far ahead someone must be told}
+  - group: Money
+    color: orange
+    items:
+      - {id: limit, name: Amount limit, criteria: a number that changes what is allowed}
+      - {id: approval, name: Approval, criteria: who must say yes before it happens}
+  - group: Data
+    color: purple
+    items:
+      - {id: privacy, name: Personal data, criteria: rules that touch personal information}
+links:
+  - {category: onboard, tag: deadline, notes: ["Accounts are requested 5 working days before day one."]}
+  - {category: onboard, tag: privacy, notes: ["ID copies are deleted after the contract is signed."]}
+  - {category: leave, tag: notice, notes: ["Annual leave over 3 days: tell the manager 2 weeks ahead."]}
+  - {category: leave, tag: approval, notes: ["The manager approves annual leave in the HR tool."]}
+  - {category: expense, tag: deadline, notes: ["Claims are filed within 30 days of the purchase."]}
+  - {category: expense, tag: limit, weight: 3, notes: ["Meals: up to 30 per person.", "Above 500 needs a quote.", "Gifts: up to 50."]}
+  - {category: expense, tag: approval, notes: ["Above 500: the budget owner approves first."]}
+  - {category: travel, tag: limit, notes: ["Hotels: up to 150 a night in cities."]}
+  - {category: travel, tag: approval, notes: ["Flights abroad: director approval."]}
+  - {category: travel, tag: notice, notes: ["Book 3 weeks ahead where possible."]}
+  - {category: security, tag: privacy, weight: 2, notes: ["Customer data stays on managed devices.", "Report a lost laptop the same day."]}
+  - {category: security, tag: deadline, notes: ["Passwords are changed after any suspected leak, within 24 hours."]}
+note: Example data for the xref kind. Click a dot, a chapter or a tag.

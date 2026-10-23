@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which picture?</title>
+<style>
+:root{--bg:#f7f5ef;--card:#fff;--ink:#1e1b2e;--sub:#5f6472;--line:#e3dfd5;--soft:#efece4;--accent:#3a5bd9}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#17151f;--card:#211f2b;--ink:#efeae0;--sub:#a9a6b4;--line:#34313f;--soft:#2a2835;--accent:#8fa8ff}}
+:root[data-theme="dark"]{--bg:#17151f;--card:#211f2b;--ink:#efeae0;--sub:#a9a6b4;--line:#34313f;--soft:#2a2835;--accent:#8fa8ff}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:15px/1.55 "Pretendard","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif}
+header{max-width:1440px;margin:0 auto;padding:22px 24px 6px}
+h1{font-size:22px;margin:0 0 4px;letter-spacing:-.3px}
+.lead{color:var(--sub);margin:0;font-size:14px}
+.lead a,.panel a{color:var(--accent)}
+.bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;max-width:1440px;margin:10px auto 0;padding:0 24px}
+.bar button,.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 13px;border-radius:999px;cursor:pointer;font:inherit;font-size:13.5px}
+.bar button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.bar input{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 13px;font:inherit;font-size:13.5px;min-width:180px}
+.chip b{font-weight:600;margin-left:4px;color:var(--sub)}
+.chip:hover,.bar button:hover{border-color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;max-width:1440px;margin:12px auto 40px;padding:0 24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.panel{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+.panel h2{font-size:17px;margin:0 0 2px}
+.meta{color:var(--sub);font-size:13px;margin-bottom:8px}
+.empty{color:var(--sub);font-size:14px;margin:0}
+.note{font-size:12.5px;color:var(--sub);border-top:1px solid var(--line);margin-top:12px;padding-top:8px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:13px;color:var(--sub);margin:0 0 10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.foot{max-width:1440px;margin:-28px auto 30px;padding:0 24px;color:var(--sub);font-size:12.5px}
+@media (max-width:900px){
+  .wrap{grid-template-columns:minmax(0,1fr);padding:0 16px}
+  header,.bar,.foot{padding-left:16px;padding-right:16px}
+  .panel{position:static;max-height:none}
+}
+
+.mm{overflow:auto;max-height:80vh}
+.mm svg{display:block}
+.mm path{fill:none;stroke-width:2;stroke-opacity:.55}
+.mm g.n{cursor:pointer}
+.mm g.n text{fill:var(--ink);font-size:13.5px;dominant-baseline:central}
+.mm g.n.d0 text{fill:#fff;font-weight:700;font-size:15px}
+.mm g.n.d1 text{font-weight:700;font-size:14px}
+.mm g.n.hit text{text-decoration:underline;text-decoration-thickness:2px}
+.mm g.n.sel rect.box{stroke-width:2.5}
+.mm g.n:hover text{text-decoration:underline}
+.mm .more{font-size:11px;font-weight:700;fill:#fff}
+.panel .crumb{color:var(--sub);font-size:12.5px;margin-bottom:4px}
+.panel p.body{white-space:pre-wrap;margin:6px 0}
+</style>
+</head>
+<body>
+<header><h1>Which picture?</h1><p class="lead">the four kinds of vis, and when each one fits</p></header>
+
+<nav class="bar">
+  <button data-lv="all">Expand all</button><button data-lv="0">Collapse all</button><button data-lv="1">1 level</button><button data-lv="2">2 level</button>
+  <input id="q" type="search" placeholder="Find">
+</nav>
+<div class="wrap">
+  <main class="card"><div class="mm" id="mm"></div></main>
+  <aside><div class="card panel" id="panel"><p class="empty">Click a node to open or close it; its note shows here.</p></div></aside>
+</div>
+
+<script>
+const D = {"W": {"all": "Expand all", "none": "Collapse all", "level": "level", "find": "Find", "pick": "Click a node to open or close it; its note shows here.", "kids": "Children", "link": "More"}, "N": [{"label": "vis", "note": "", "url": "", "p": -1, "d": 0, "kids": [1, 5, 10, 14], "c": "#5B6CFF", "b": 0, "open": true}, {"label": "arch", "note": "Cartoon architecture diagram. HTML with doc links, SVG and PNG for slides and posts.", "url": "", "p": 0, "d": 1, "kids": [2, 3, 4], "c": "#4CB8FF", "b": 1, "open": true}, {"label": "Core entities as icons", "note": "", "url": "", "p": 1, "d": 2, "kids": [], "c": "#4CB8FF", "b": 1, "open": true}, {"label": "Arrows say what each does to the other", "note": "", "url": "", "p": 1, "d": 2, "kids": [], "c": "#4CB8FF", "b": 1, "open": true}, {"label": "Groups for places (home PC, cloud)", "note": "", "url": "", "p": 1, "d": 2, "kids": [], "c": "#4CB8FF", "b": 1, "open": true}, {"label": "xref", "note": "Categories down the side, tags across the top. For rules spread over many chapters.", "url": "", "p": 0, "d": 1, "kids": [6, 7, 8, 9], "c": "#FF9F1C", "b": 5, "open": true}, {"label": "Matrix of categories × tags", "note": "", "url": "", "p": 5, "d": 2, "kids": [], "c": "#FF9F1C", "b": 5, "open": true}, {"label": "Relation graph (two columns)", "note": "", "url": "", "p": 5, "d": 2, "kids": [], "c": "#FF9F1C", "b": 5, "open": true}, {"label": "Category tree", "note": "", "url": "", "p": 5, "d": 2, "kids": [], "c": "#FF9F1C", "b": 5, "open": true}, {"label": "Tag list with criteria", "note": "", "url": "", "p": 5, "d": 2, "kids": [], "c": "#FF9F1C", "b": 5, "open": true}, {"label": "mindmap", "note": "A collapsible tree for an outline, a course map or a brainstorm.", "url": "", "p": 0, "d": 1, "kids": [11, 12, 13], "c": "#FF6FB5", "b": 10, "open": true}, {"label": "Click to open or close", "note": "", "url": "", "p": 10, "d": 2, "kids": [], "c": "#FF6FB5", "b": 10, "open": true}, {"label": "Search opens the path to a match", "note": "", "url": "", "p": 10, "d": 2, "kids": [], "c": "#FF6FB5", "b": 10, "open": true}, {"label": "Expand by level", "note": "", "url": "", "p": 10, "d": 2, "kids": [], "c": "#FF6FB5", "b": 10, "open": true}, {"label": "graph", "note": "A network where nothing is above anything else.", "url": "", "p": 0, "d": 1, "kids": [15, 16, 17], "c": "#8FD14F", "b": 14, "open": true}, {"label": "Drag, pan, zoom", "note": "", "url": "", "p": 14, "d": 2, "kids": [], "c": "#8FD14F", "b": 14, "open": true}, {"label": "Click a node for its links", "note": "", "url": "", "p": 14, "d": 2, "kids": [], "c": "#8FD14F", "b": 14, "open": true}, {"label": "Hide a group from the legend", "note": "", "url": "", "p": 14, "d": 2, "kids": [], "c": "#8FD14F", "b": 14, "open": true}]};
+
+const {W, N} = D;
+const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const ctx = document.createElement('canvas').getContext('2d');
+const FONT = '"Pretendard","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif';
+const width = n => { ctx.font = (n.d === 0 ? '700 15px ' : n.d === 1 ? '700 14px ' : '13.5px ') + FONT; return ctx.measureText(n.label).width; };
+N.forEach(n => n.w = width(n) + (n.d <= 1 ? 26 : 16));
+let sel = null, hits = new Set();
+const ROW = 30, GAP = 54, PAD = 20;
+
+function draw() {
+  const vis = [], colW = [];
+  (function walk(i) { const n = N[i]; vis.push(i); colW[n.d] = Math.max(colW[n.d] || 0, n.w); if (n.open) n.kids.forEach(walk); })(0);
+  const xs = [PAD]; colW.forEach((w, d) => xs[d + 1] = xs[d] + w + GAP + 14);
+  let cur = PAD + ROW / 2;
+  (function place(i) {
+    const n = N[i], kids = n.open ? n.kids : [];
+    n.x = xs[n.d];
+    if (!kids.length) { n.y = cur; cur += ROW; return; }
+    kids.forEach(place);
+    n.y = (N[kids[0]].y + N[kids[kids.length - 1]].y) / 2;
+  })(0);
+  const Wd = Math.max(...vis.map(i => N[i].x + N[i].w)) + PAD + 40, H = cur + PAD;
+  let s = `<svg width="${Wd}" height="${H}" viewBox="0 0 ${Wd} ${H}">`;
+  vis.forEach(i => { const n = N[i]; if (n.p < 0) return; const p = N[n.p], x1 = p.x + p.w, m = (x1 + n.x) / 2;
+    s += `<path d="M${x1},${p.y} C${m},${p.y} ${m},${n.y} ${n.x},${n.y}" stroke="${n.c}"/>`; });
+  vis.forEach(i => {
+    const n = N[i], cls = `n d${Math.min(n.d, 2)}${sel === i ? ' sel' : ''}${hits.has(i) ? ' hit' : ''}`;
+    s += `<g class="${cls}" data-i="${i}">`;
+    if (n.d === 0) s += `<rect class="box" x="${n.x}" y="${n.y - 15}" width="${n.w}" height="30" rx="15" fill="${n.c}" stroke="${n.c}"/>`;
+    else if (n.d === 1) s += `<rect class="box" x="${n.x}" y="${n.y - 14}" width="${n.w}" height="28" rx="8" fill="${n.c}26" stroke="${n.c}" stroke-width="1.5"/>`;
+    else s += `<rect class="box" x="${n.x}" y="${n.y - 12}" width="${n.w}" height="24" rx="6" fill="transparent" stroke="${sel === i ? n.c : 'transparent'}"/><line x1="${n.x}" y1="${n.y + 11}" x2="${n.x + n.w}" y2="${n.y + 11}" stroke="${n.c}" stroke-width="1.5" stroke-opacity=".5"/>`;
+    s += `<text x="${n.x + (n.d <= 1 ? 13 : 8)}" y="${n.y}">${esc(n.label)}</text>`;
+    if (n.kids.length && !n.open) s += `<circle cx="${n.x + n.w + 12}" cy="${n.y}" r="10" fill="${n.c}"/><text class="more" x="${n.x + n.w + 12}" y="${n.y + 0.5}" text-anchor="middle" dominant-baseline="central">+${n.kids.length}</text>`;
+    s += '</g>';
+  });
+  document.getElementById('mm').innerHTML = s + '</svg>';
+}
+function crumb(i) { const out = []; for (let p = N[i].p; p >= 0; p = N[p].p) out.unshift(N[p].label); return out.join(' › '); }
+function show(i) {
+  const n = N[i];
+  document.getElementById('panel').innerHTML = `${n.p >= 0 ? `<div class="crumb">${esc(crumb(i))}</div>` : ''}<h2 style="color:${n.d ? n.c : 'inherit'}">${esc(n.label)}</h2>`
+    + (n.note ? `<p class="body">${esc(n.note)}</p>` : '')
+    + (n.url ? `<p><a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(W.link)} ↗</a></p>` : '')
+    + (n.kids.length ? `<div class="meta">${esc(W.kids)} ${n.kids.length}</div><ul style="margin:0;padding-left:18px">${n.kids.map(k => `<li>${esc(N[k].label)}</li>`).join('')}</ul>` : '');
+}
+document.getElementById('mm').addEventListener('click', e => {
+  const g = e.target.closest('g.n'); if (!g) return;
+  const i = +g.dataset.i;
+  if (N[i].kids.length && (sel === i || !N[i].open)) N[i].open = !N[i].open;
+  sel = i; show(i); draw();
+});
+document.querySelectorAll('nav.bar button').forEach(b => b.onclick = () => {
+  const lv = b.dataset.lv;
+  N.forEach(n => n.open = lv === 'all' ? true : n.d < +lv);
+  if (lv === '0') N[0].open = false;
+  draw();
+});
+document.getElementById('q').addEventListener('input', e => {
+  const q = e.target.value.trim().toLowerCase(); hits = new Set();
+  if (q) N.forEach((n, i) => { if ((n.label + ' ' + n.note).toLowerCase().includes(q)) { hits.add(i); for (let p = n.p; p >= 0; p = N[p].p) N[p].open = true; } });
+  draw();
+});
+draw();
+
+</script>
+</body>
+</html>

@@ -41,7 +41,7 @@ def test_png_size(tmp_path):
 
 
 def test_reference_lists_every_icon():
-    ref = (ROOT / ".claude" / "skills" / "draw" / "reference.md").read_text(encoding="utf-8")
+    ref = (ROOT / ".claude" / "skills" / "vis" / "reference.md").read_text(encoding="utf-8")
     section = ref.split("## Icons", 1)[1].split("##", 1)[0]
     table = {}
     for m in re.finditer(r"^\| (\w+) \| ([^|]*)\|", section, re.M):

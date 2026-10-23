@@ -59,7 +59,7 @@ class Spec:
 
 _ID = r"[\w.]+"
 _ARROW = re.compile(rf"^\s*({_ID})\s*(<?--?>)\s*({_ID})\s*(?::\s*(.*?))?\s*$")
-_TOP = {"title", "subtitle", "note", "nodes", "edges", "groups", "layout"}
+_TOP = {"kind", "title", "subtitle", "note", "nodes", "edges", "groups", "layout"}
 _NODE = {"label", "icon", "color", "tech", "role", "doc", "group", "col", "at"}
 _EDGE = {"from", "to", "label", "both", "dashed", "step", "color"}
 _GROUP = {"label", "color"}

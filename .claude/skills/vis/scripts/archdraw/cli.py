@@ -1,4 +1,4 @@
-"""Command line: python draw.py spec.yaml [-o out] [--formats html,svg,png]."""
+"""arch kind: python vis.py spec.yaml [-o out] [--formats html,svg,png]."""
 from __future__ import annotations
 
 import argparse
@@ -24,7 +24,7 @@ def gallery_spec():
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="draw.py", description="Colourful cartoon architecture diagrams.")
+    ap = argparse.ArgumentParser(prog="vis.py", description="Colourful cartoon architecture diagrams.")
     ap.add_argument("spec", nargs="?", help="diagram spec (.yaml or .json)")
     ap.add_argument("-o", "--out", help="output path without extension (default: next to the spec)")
     ap.add_argument("--formats", default="html,svg,png", help="any of html,svg,png (default: all three)")

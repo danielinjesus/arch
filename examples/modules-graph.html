@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How vis is built</title>
+<style>
+:root{--bg:#f7f5ef;--card:#fff;--ink:#1e1b2e;--sub:#5f6472;--line:#e3dfd5;--soft:#efece4;--accent:#3a5bd9}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#17151f;--card:#211f2b;--ink:#efeae0;--sub:#a9a6b4;--line:#34313f;--soft:#2a2835;--accent:#8fa8ff}}
+:root[data-theme="dark"]{--bg:#17151f;--card:#211f2b;--ink:#efeae0;--sub:#a9a6b4;--line:#34313f;--soft:#2a2835;--accent:#8fa8ff}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:15px/1.55 "Pretendard","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif}
+header{max-width:1440px;margin:0 auto;padding:22px 24px 6px}
+h1{font-size:22px;margin:0 0 4px;letter-spacing:-.3px}
+.lead{color:var(--sub);margin:0;font-size:14px}
+.lead a,.panel a{color:var(--accent)}
+.bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;max-width:1440px;margin:10px auto 0;padding:0 24px}
+.bar button,.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 13px;border-radius:999px;cursor:pointer;font:inherit;font-size:13.5px}
+.bar button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.bar input{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 13px;font:inherit;font-size:13.5px;min-width:180px}
+.chip b{font-weight:600;margin-left:4px;color:var(--sub)}
+.chip:hover,.bar button:hover{border-color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;max-width:1440px;margin:12px auto 40px;padding:0 24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.panel{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+.panel h2{font-size:17px;margin:0 0 2px}
+.meta{color:var(--sub);font-size:13px;margin-bottom:8px}
+.empty{color:var(--sub);font-size:14px;margin:0}
+.note{font-size:12.5px;color:var(--sub);border-top:1px solid var(--line);margin-top:12px;padding-top:8px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:13px;color:var(--sub);margin:0 0 10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.foot{max-width:1440px;margin:-28px auto 30px;padding:0 24px;color:var(--sub);font-size:12.5px}
+@media (max-width:900px){
+  .wrap{grid-template-columns:minmax(0,1fr);padding:0 16px}
+  header,.bar,.foot{padding-left:16px;padding-right:16px}
+  .panel{position:static;max-height:none}
+}
+
+#gv{display:block;width:100%;height:min(78vh,760px);touch-action:none;cursor:grab;background:var(--card)}
+#gv.drag{cursor:grabbing}
+#gv line{stroke:var(--sub);stroke-opacity:.45}
+#gv path.ah{fill:var(--sub)}
+#gv line.lit{stroke-opacity:.95}
+#gv .faded{opacity:.1}
+#gv g.n{cursor:pointer}
+#gv g.n circle{stroke:var(--card);stroke-width:2}
+#gv g.n.sel circle{stroke:var(--ink);stroke-width:3}
+#gv g.n.hit circle{stroke:var(--accent);stroke-width:4}
+#gv text{fill:var(--ink);font-size:12.5px;paint-order:stroke;stroke:var(--card);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+#gv text.el{fill:var(--sub);font-size:11px;display:none}
+#gv.labels text.el,#gv text.el.lit{display:block}
+.legend .gchip{cursor:pointer;user-select:none}
+.legend .gchip.off{opacity:.35;text-decoration:line-through}
+.panel ul{margin:4px 0;padding-left:18px}
+.panel li span{cursor:pointer}
+.panel li span:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+<header><h1>How vis is built</h1><p class="lead">modules and what calls what</p></header>
+
+<nav class="bar">
+  <span class="legend" id="legend" style="margin:0"></span>
+  <input id="q" type="search" placeholder="Find">
+  <button id="fit">Fit</button><button id="lab">Edge labels</button>
+</nav>
+<div class="wrap">
+  <main class="card" style="padding:0;overflow:hidden"><svg id="gv" viewBox="0 0 1000 680" role="img"></svg></main>
+  <aside><div class="card panel" id="panel"><p class="empty">Click a node to see its links and note. Drag to move, wheel to zoom.</p></div></aside>
+</div>
+
+<script>
+const D = {"W": {"find": "Find", "fit": "Fit", "labels": "Edge labels", "pick": "Click a node to see its links and note. Drag to move, wheel to zoom.", "links": "Links", "link": "More", "out": "→", "in": "←"}, "G": [{"label": "Entry", "color": "#FF9F1C"}, {"label": "archdraw", "color": "#4CB8FF"}, {"label": "visdraw", "color": "#9B5DE5"}], "N": [{"label": "vis.py", "g": 0, "size": 2, "note": "The one command. Reads the spec's kind.", "url": ""}, {"label": "visdraw.cli", "g": 2, "size": 2, "note": "Picks the builder or hands arch specs to archdraw.", "url": ""}, {"label": "common", "g": 2, "size": 1, "note": "Reading specs, colours, the page shell.", "url": ""}, {"label": "xref", "g": 2, "size": 1, "note": "", "url": ""}, {"label": "mindmap", "g": 2, "size": 1, "note": "", "url": ""}, {"label": "graph", "g": 2, "size": 1, "note": "", "url": ""}, {"label": "archdraw.cli", "g": 1, "size": 2, "note": "", "url": ""}, {"label": "spec", "g": 1, "size": 1, "note": "", "url": ""}, {"label": "layout", "g": 1, "size": 1, "note": "", "url": ""}, {"label": "route", "g": 1, "size": 1, "note": "", "url": ""}, {"label": "render", "g": 1, "size": 1, "note": "", "url": ""}, {"label": "png", "g": 1, "size": 1, "note": "Headless Chrome, Edge or Chromium screenshots.", "url": ""}, {"label": "palette", "g": 1, "size": 1, "note": "", "url": ""}], "E": [{"s": 0, "t": 1, "label": "runs", "w": 1, "both": false, "dash": false, "dir": true}, {"s": 1, "t": 6, "label": "kind arch", "w": 1, "both": false, "dash": false, "dir": true}, {"s": 1, "t": 3, "label": "builds", "w": 1, "both": false, "dash": false, "dir": true}, {"s": 1, "t": 4, "label": "builds", "w": 1, "both": false, "dash": false, "dir": true}, {"s": 1, "t": 5, "label": "builds", "w": 1, "both": false, "dash": false, "dir": true}, {"s": 1, "t": 11, "label": "html to png", "w": 1, "both": false, "dash": false, "dir": true}, {"s": 3, "t": 2, "label": "", "w": 1, "both": false, "dash": false, "dir": true}, {"s": 4, "t": 2, "label": "", "w": 1, "both": false, "dash": false, "dir": true}, {"s": 5, "t": 2, "label": "", "w": 1, "both": false, "dash": false, "dir": true}, {"s": 2, "t": 12, "label": "colours", "w": 1, "both": false, "dash": false, "dir": true}, {"s": 6, "t": 7, "label": "parses", "w": 1, "both": false, "dash": false, "dir": true}, {"s": 6, "t": 8, "label": "", "w": 1, "both": false, "dash": false, "dir": true}, {"s": 8, "t": 9, "label": "", "w": 1, "both": false, "dash": false, "dir": true}, {"s": 9, "t": 10, "label": "", "w": 1, "both": false, "dash": false, "dir": true}, {"s": 6, "t": 11, "label": "svg to png", "w": 1, "both": false, "dash": false, "dir": true}, {"s": 10, "t": 12, "label": "", "w": 1, "both": false, "dash": false, "dir": true}]};
+
+const {W, G, N, E} = D;
+const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const svg = document.getElementById('gv'), NS = 'http://www.w3.org/2000/svg';
+const colr = n => n.g >= 0 ? G[n.g].color : '#8A8797';
+const R = n => 7 + Math.sqrt(n.size) * 5;
+const off = new Set();
+let sel = null, hits = new Set();
+// place nodes on a circle by group so the first frame already looks ordered
+N.forEach((n, i) => { const a = 2 * Math.PI * (i / N.length) + (n.g + 1); n.x = 500 + 260 * Math.cos(a); n.y = 340 + 220 * Math.sin(a); n.vx = n.vy = 0; });
+const nb = N.map(() => new Set());
+E.forEach(e => { nb[e.s].add(e.t); nb[e.t].add(e.s); });
+
+function tick(alpha) {
+  const k = 90;
+  for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) {
+    const a = N[i], b = N[j]; let dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy || 0.01;
+    if (d2 > 160000) continue;
+    const f = (k * k / d2) * alpha * 0.9; a.vx += dx * f / 10; a.vy += dy * f / 10; b.vx -= dx * f / 10; b.vy -= dy * f / 10;
+  }
+  E.forEach(e => { const a = N[e.s], b = N[e.t], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1;
+    const f = (d - (k + R(a) + R(b))) / d * 0.06 * alpha * Math.min(2, e.w); a.vx += dx * f; a.vy += dy * f; b.vx -= dx * f; b.vy -= dy * f; });
+  N.forEach(n => { n.vx += (500 - n.x) * 0.004 * alpha; n.vy += (340 - n.y) * 0.004 * alpha;
+    if (n.fixed) { n.vx = n.vy = 0; return; } n.x += n.vx; n.y += n.vy; n.vx *= 0.6; n.vy *= 0.6; });
+}
+for (let i = 0; i < 400; i++) tick(1 - i / 450);
+
+let view = {x: 0, y: 0, k: 1};
+const root = document.createElementNS(NS, 'g'); svg.appendChild(root);
+const defs = document.createElementNS(NS, 'defs');
+defs.innerHTML = `<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>`;
+svg.insertBefore(defs, root);
+function render() {
+  root.setAttribute('transform', `translate(${view.x},${view.y}) scale(${view.k})`);
+  let s = '';
+  const focus = sel != null ? new Set([sel, ...nb[sel]]) : null;
+  E.forEach((e, i) => {
+    const a = N[e.s], b = N[e.t]; if (off.has(a.g) || off.has(b.g)) return;
+    const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, ux = dx / d, uy = dy / d;
+    const x1 = a.x + ux * (R(a) + (e.both ? 3 : 0)), y1 = a.y + uy * (R(a) + (e.both ? 3 : 0)), x2 = b.x - ux * (R(b) + 3), y2 = b.y - uy * (R(b) + 3);
+    const on = focus && (e.s === sel || e.t === sel), fade = focus && !on;
+    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="${(1 + Math.log2(1 + e.w)).toFixed(2)}" class="${on ? 'lit' : ''}${fade ? ' faded' : ''}"${e.dash ? ' stroke-dasharray="5 5"' : ''}${e.dir ? ' marker-end="url(#ah)"' : ''}${e.dir && e.both ? ' marker-start="url(#ah)"' : ''}/>`;
+    if (e.label) s += `<text class="el${on ? ' lit' : ''}${fade ? ' faded' : ''}" x="${(a.x + b.x) / 2}" y="${(a.y + b.y) / 2 - 4}" text-anchor="middle">${esc(e.label)}</text>`;
+  });
+  N.forEach((n, i) => {
+    if (off.has(n.g)) return;
+    const fade = focus && !focus.has(i);
+    s += `<g class="n${sel === i ? ' sel' : ''}${hits.has(i) ? ' hit' : ''}${fade ? ' faded' : ''}" data-i="${i}"><circle cx="${n.x}" cy="${n.y}" r="${R(n)}" fill="${colr(n)}"/><text x="${n.x}" y="${n.y + R(n) + 14}" text-anchor="middle">${esc(n.label)}</text></g>`;
+  });
+  root.innerHTML = s;
+}
+function fit() {
+  const xs = N.map(n => n.x), ys = N.map(n => n.y), pad = 60;
+  const x0 = Math.min(...xs) - pad, x1 = Math.max(...xs) + pad, y0 = Math.min(...ys) - pad, y1 = Math.max(...ys) + pad;
+  const k = Math.min(1000 / (x1 - x0), 680 / (y1 - y0), 2.5);
+  view = {k, x: (1000 - (x1 + x0) * k) / 2, y: (680 - (y1 + y0) * k) / 2}; render();
+}
+function show(i) {
+  const n = N[i], out = E.filter(e => e.s === i), inn = E.filter(e => e.t === i);
+  const li = (e, j, arrow) => `<li>${arrow} <span data-i="${j}">${esc(N[j].label)}</span>${e.label ? ` <span class="meta">· ${esc(e.label)}</span>` : ''}</li>`;
+  document.getElementById('panel').innerHTML = `<h2 style="color:${colr(n)}">${esc(n.label)}</h2><div class="meta">${n.g >= 0 ? esc(G[n.g].label) + ' · ' : ''}${esc(W.links)} ${nb[i].size}</div>`
+    + (n.note ? `<p style="white-space:pre-wrap;margin:6px 0">${esc(n.note)}</p>` : '')
+    + (n.url ? `<p><a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(W.link)} ↗</a></p>` : '')
+    + `<ul>${out.map(e => li(e, e.t, W.out)).join('')}${inn.map(e => li(e, e.s, W.in)).join('')}</ul>`;
+}
+document.getElementById('panel').addEventListener('click', e => { const x = e.target.closest('span[data-i]'); if (x) { sel = +x.dataset.i; show(sel); render(); } });
+
+// drag a node, or pan the canvas; wheel zooms around the pointer
+const pt = e => { const r = svg.getBoundingClientRect(), sx = 1000 / r.width, sy = 680 / r.height; return {x: (e.clientX - r.left) * sx, y: (e.clientY - r.top) * sy}; };
+let drag = null;
+svg.addEventListener('pointerdown', e => {
+  const g = e.target.closest('g.n'), p = pt(e);
+  drag = g ? {i: +g.dataset.i, moved: false} : {pan: true, x: p.x - view.x, y: p.y - view.y};
+  svg.setPointerCapture(e.pointerId); svg.classList.add('drag');
+});
+svg.addEventListener('pointermove', e => {
+  if (!drag) return; const p = pt(e);
+  if (drag.pan) { view.x = p.x - drag.x; view.y = p.y - drag.y; render(); return; }
+  const n = N[drag.i]; n.x = (p.x - view.x) / view.k; n.y = (p.y - view.y) / view.k; n.fixed = true; drag.moved = true;
+  for (let t = 0; t < 3; t++) tick(0.3);
+  render();
+});
+svg.addEventListener('pointerup', () => {
+  if (drag && drag.i != null && !drag.moved) { sel = sel === drag.i ? null : drag.i; sel != null ? show(sel) : null; render(); }
+  drag = null; svg.classList.remove('drag');
+});
+svg.addEventListener('wheel', e => {
+  e.preventDefault(); const p = pt(e), f = e.deltaY < 0 ? 1.12 : 1 / 1.12, k = Math.max(0.2, Math.min(5, view.k * f));
+  view.x = p.x - (p.x - view.x) * (k / view.k); view.y = p.y - (p.y - view.y) * (k / view.k); view.k = k; render();
+}, {passive: false});
+
+const lg = document.getElementById('legend');
+lg.innerHTML = G.map((g, i) => `<span class="gchip" data-g="${i}"><i style="background:${g.color}"></i>${esc(g.label)}</span>`).join('');
+lg.onclick = e => { const x = e.target.closest('.gchip'); if (!x) return; const g = +x.dataset.g; off.has(g) ? off.delete(g) : off.add(g); x.classList.toggle('off'); render(); };
+document.getElementById('fit').onclick = fit;
+document.getElementById('lab').onclick = e => { svg.classList.toggle('labels'); e.target.classList.toggle('on'); };
+document.getElementById('q').addEventListener('input', e => {
+  const q = e.target.value.trim().toLowerCase(); hits = new Set();
+  if (q) N.forEach((n, i) => { if ((n.label + ' ' + n.note).toLowerCase().includes(q)) hits.add(i); });
+  render();
+});
+fit();
+
+</script>
+</body>
+</html>

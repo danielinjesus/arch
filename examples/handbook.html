@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handbook rules map</title>
+<style>
+:root{--bg:#f7f5ef;--card:#fff;--ink:#1e1b2e;--sub:#5f6472;--line:#e3dfd5;--soft:#efece4;--accent:#3a5bd9}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#17151f;--card:#211f2b;--ink:#efeae0;--sub:#a9a6b4;--line:#34313f;--soft:#2a2835;--accent:#8fa8ff}}
+:root[data-theme="dark"]{--bg:#17151f;--card:#211f2b;--ink:#efeae0;--sub:#a9a6b4;--line:#34313f;--soft:#2a2835;--accent:#8fa8ff}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:15px/1.55 "Pretendard","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif}
+header{max-width:1440px;margin:0 auto;padding:22px 24px 6px}
+h1{font-size:22px;margin:0 0 4px;letter-spacing:-.3px}
+.lead{color:var(--sub);margin:0;font-size:14px}
+.lead a,.panel a{color:var(--accent)}
+.bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;max-width:1440px;margin:10px auto 0;padding:0 24px}
+.bar button,.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 13px;border-radius:999px;cursor:pointer;font:inherit;font-size:13.5px}
+.bar button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.bar input{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 13px;font:inherit;font-size:13.5px;min-width:180px}
+.chip b{font-weight:600;margin-left:4px;color:var(--sub)}
+.chip:hover,.bar button:hover{border-color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;max-width:1440px;margin:12px auto 40px;padding:0 24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.panel{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+.panel h2{font-size:17px;margin:0 0 2px}
+.meta{color:var(--sub);font-size:13px;margin-bottom:8px}
+.empty{color:var(--sub);font-size:14px;margin:0}
+.note{font-size:12.5px;color:var(--sub);border-top:1px solid var(--line);margin-top:12px;padding-top:8px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:13px;color:var(--sub);margin:0 0 10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.foot{max-width:1440px;margin:-28px auto 30px;padding:0 24px;color:var(--sub);font-size:12.5px}
+@media (max-width:900px){
+  .wrap{grid-template-columns:minmax(0,1fr);padding:0 16px}
+  header,.bar,.foot{padding-left:16px;padding-right:16px}
+  .panel{position:static;max-height:none}
+}
+
+.pipe{display:flex;flex-wrap:wrap;gap:6px;list-style:none;max-width:1440px;margin:10px auto 0;padding:0 24px;counter-reset:p}
+.pipe li{counter-increment:p;flex:1 1 140px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-weight:600;font-size:14px}
+.pipe li::before{content:counter(p);color:var(--sub);font-weight:400;margin-right:6px}
+.pipe li small{display:block;font-weight:400;color:var(--sub);font-size:12px}
+.pipe li.here{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.view{display:none}.view.on{display:block}
+.scroll{overflow:auto;max-height:78vh}
+table.mx{border-collapse:separate;border-spacing:0;font-size:13px}
+.mx th,.mx td{padding:0}
+.mx thead th{position:sticky;top:0;background:var(--card);z-index:2;vertical-align:bottom}
+.mx thead th.corner{left:0;z-index:3;text-align:left;padding:0 8px 6px 0;color:var(--sub);font-weight:400}
+.mx .colh{writing-mode:vertical-rl;white-space:nowrap;padding:6px 0;cursor:pointer;font-weight:500;width:30px;margin:0 auto;font-size:12.5px}
+.mx .colh.cjk{text-orientation:upright;letter-spacing:-1px}
+.mx .colh:hover,.mx .colh.sel{text-decoration:underline}
+.mx tbody th{position:sticky;left:0;background:var(--card);text-align:left;font-weight:400;white-space:nowrap;padding:3px 10px 3px 0;cursor:pointer;z-index:1;max-width:260px;overflow:hidden;text-overflow:ellipsis}
+.mx tbody th:hover,.mx tbody th.sel{color:var(--accent)}
+.mx tr.grp th{font-weight:700;padding-top:12px;color:var(--sub);cursor:default;font-size:12px}
+.mx td.c{width:30px;height:26px;text-align:center;cursor:pointer}
+.mx td.c span{display:inline-block;border-radius:50%;vertical-align:middle}
+.mx td.c:hover,.mx td.hl{background:var(--soft)}
+.mx td.dim span{opacity:.18}
+.pre{display:inline-block;min-width:62px;color:var(--sub)}
+#graph svg{display:block;width:100%;height:auto}
+#graph text{font-size:12.5px;fill:var(--ink);cursor:pointer}
+#graph text.gh{font-weight:700;fill:var(--sub);font-size:12px;cursor:default}
+#graph path{fill:none;stroke-opacity:.35;transition:stroke-opacity .15s}
+#graph .faded{opacity:.12}
+#graph path.faded{stroke-opacity:.04}
+#graph path.lit{stroke-opacity:.9}
+.tree details{border-bottom:1px solid var(--line);padding:6px 0}
+.tree summary{cursor:pointer;font-weight:700}
+.tree ul{margin:6px 0 6px 6px;padding-left:18px}
+.tree li{margin:3px 0}
+.tree .ci{cursor:pointer}
+.tree .ci:hover{color:var(--accent)}
+.tg{margin-bottom:14px}
+.tg h3{font-size:14px;margin:0 0 4px}
+.crit{background:var(--soft);border-radius:8px;padding:8px 10px;font-size:13.5px;margin:6px 0 10px}
+.snip{border-left:3px solid var(--line);padding:4px 0 4px 10px;margin:8px 0;font-size:13.5px}
+.snip .where{font-size:12px;color:var(--sub);display:block;margin-bottom:2px}
+@media (max-width:900px){.pipe{padding:0 16px}.mx tbody th{max-width:150px}}
+</style>
+</head>
+<body>
+<header><h1>Handbook rules map</h1><p class="lead">chapters down the side, cross-cutting rules across the top (example data)</p></header>
+<ol class="pipe"><li class="">Documents<small>the handbook</small></li><li class="here">Taxonomy<small>chapters + criteria</small></li><li class="here">Tagging<small>1..n tags per rule</small></li><li class="here">Cross reference<small>same tag together</small></li><li class="">Review<small>check a draft</small></li></ol>
+<nav class="bar">
+  <button data-v="matrix" class="on">Matrix</button>
+  <button data-v="graph">Relations</button>
+  <button data-v="tree">Categories</button>
+  <button data-v="tags">All tags</button>
+</nav>
+<div class="wrap">
+  <main class="card">
+    <div class="legend" id="legend"></div>
+    <section class="view on" id="matrix"><div class="scroll"><table class="mx" id="mx"></table></div></section>
+    <section class="view" id="graph"></section>
+    <section class="view tree" id="tree"></section>
+    <section class="view" id="tags"></section>
+  </main>
+  <aside><div class="card panel" id="panel"><p class="empty">Click a cell or a name to gather what is linked to it.</p></div></aside>
+</div>
+<p class="foot">Example data for the xref kind. Click a dot, a chapter or a tag.</p>
+<script>
+const D = {"W": {"category": "category", "tag": "tag", "matrix": "Matrix", "graph": "Relations", "tree": "Categories", "tags": "All tags", "times": "×", "cats": "", "pick": "Click a cell or a name to gather what is linked to it.", "criteria": "Criteria", "gather": "Everything this tag touches, in one place.", "all_tag": "Whole tag", "this_cat": "This category", "linked": "Linked tags", "no_notes": "no notes", "hover": "Left: categories (vertical). Right: tags (horizontal). Hover a name to keep only its links; click to gather.", "count_note": "The number is how many categories the tag touches."}, "CG": [{"name": "People"}, {"name": "Money"}, {"name": "Safety"}], "C": [{"label": "Onboarding", "prefix": "1", "meta": "4 rules", "kids": ["First day", "Accounts", "Buddy"], "g": 0}, {"label": "Leave", "prefix": "2", "meta": "3 rules", "kids": ["Annual", "Sick", "Parental"], "g": 0}, {"label": "Expenses", "prefix": "3", "meta": "5 rules", "kids": ["Receipts", "Limits", "Approval"], "g": 1}, {"label": "Travel", "prefix": "4", "meta": "4 rules", "kids": ["Booking", "Per diem"], "g": 1}, {"label": "Security", "prefix": "5", "meta": "3 rules", "kids": ["Devices", "Passwords"], "g": 2}], "TG": [{"name": "Time", "color": "#4CB8FF"}, {"name": "Money", "color": "#FF9F1C"}, {"name": "Data", "color": "#9B5DE5"}], "T": [{"name": "Deadline", "g": 0, "crit": "a rule that says by when something must be done"}, {"name": "Notice period", "g": 0, "crit": "how far ahead someone must be told"}, {"name": "Amount limit", "g": 1, "crit": "a number that changes what is allowed"}, {"name": "Approval", "g": 1, "crit": "who must say yes before it happens"}, {"name": "Personal data", "g": 2, "crit": "rules that touch personal information"}], "L": {"0,0": {"n": 1, "notes": ["Accounts are requested 5 working days before day one."]}, "0,4": {"n": 1, "notes": ["ID copies are deleted after the contract is signed."]}, "1,1": {"n": 1, "notes": ["Annual leave over 3 days: tell the manager 2 weeks ahead."]}, "1,3": {"n": 1, "notes": ["The manager approves annual leave in the HR tool."]}, "2,0": {"n": 1, "notes": ["Claims are filed within 30 days of the purchase."]}, "2,2": {"n": 3, "notes": ["Meals: up to 30 per person.", "Above 500 needs a quote.", "Gifts: up to 50."]}, "2,3": {"n": 1, "notes": ["Above 500: the budget owner approves first."]}, "3,2": {"n": 1, "notes": ["Hotels: up to 150 a night in cities."]}, "3,3": {"n": 1, "notes": ["Flights abroad: director approval."]}, "3,1": {"n": 1, "notes": ["Book 3 weeks ahead where possible."]}, "4,4": {"n": 2, "notes": ["Customer data stays on managed devices.", "Report a lost laptop the same day."]}, "4,0": {"n": 1, "notes": ["Passwords are changed after any suspected leak, within 24 hours."]}}};
+
+const {W, CG, C, TG, T, L} = D;
+const col = i => TG[T[i].g].color;
+const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const cname = c => (c.prefix ? c.prefix + ' ' : '') + c.label;
+const link = (c, t) => L[c + ',' + t];
+const cjk = s => /[ㄱ-힝一-鿿]/.test(s);
+document.getElementById('legend').innerHTML = TG.map(g => `<span><i style="background:${g.color}"></i>${esc(g.name)}</span>`).join('');
+document.querySelectorAll('nav.bar button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav.bar button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === b.dataset.v));
+});
+
+function buildMatrix() {
+  let h = `<thead><tr><th class="corner">${esc(W.category)} \\ ${esc(W.tag)}</th>`;
+  T.forEach((t, i) => h += `<th><div class="colh${cjk(t.name) ? ' cjk' : ''}" data-t="${i}" style="color:${col(i)}">${esc(t.name)}</div></th>`);
+  h += '</tr></thead><tbody>';
+  let g = -1;
+  C.forEach((c, r) => {
+    if (c.g !== g) { g = c.g; if (CG[g].name) h += `<tr class="grp"><th colspan="${T.length + 1}">${esc(CG[g].name)}</th></tr>`; }
+    h += `<tr><th data-c="${r}" title="${esc(cname(c))}">${c.prefix ? `<span class="pre">${esc(c.prefix)}</span>` : ''}${esc(c.label)}</th>`;
+    T.forEach((t, i) => {
+      const x = link(r, i), s = x ? Math.min(20, 6 + Math.sqrt(x.n) * 2.6) : 0;
+      h += `<td class="c" data-c="${r}" data-t="${i}">${x ? `<span style="width:${s}px;height:${s}px;background:${col(i)}" title="${esc(c.label)} × ${esc(t.name)}: ${x.n}"></span>` : ''}</td>`;
+    });
+    h += '</tr>';
+  });
+  const mx = document.getElementById('mx');
+  mx.innerHTML = h + '</tbody>';
+  mx.onclick = e => {
+    const td = e.target.closest('td.c'), th = e.target.closest('tbody th[data-c]'), ch = e.target.closest('.colh');
+    if (td && link(+td.dataset.c, +td.dataset.t)) showCell(+td.dataset.c, +td.dataset.t);
+    else if (th) showCat(+th.dataset.c);
+    else if (ch) showTag(+ch.dataset.t);
+  };
+}
+function highlight(c, t) {
+  const any = c != null || t != null;
+  document.querySelectorAll('#mx td.c').forEach(td => {
+    const on = (c == null || +td.dataset.c === c) && (t == null || +td.dataset.t === t);
+    td.classList.toggle('dim', any && !on);
+    td.classList.toggle('hl', any && on && !!td.firstChild);
+  });
+  document.querySelectorAll('#mx tbody th[data-c]').forEach(th => th.classList.toggle('sel', +th.dataset.c === c));
+  document.querySelectorAll('#mx .colh').forEach(x => x.classList.toggle('sel', +x.dataset.t === t));
+  graphFocus(c, t);
+}
+
+let G = {};
+function buildGraph() {
+  const rowH = 24, top = 30, left = [], right = [];
+  let y = top, g = -1;
+  C.forEach((c, r) => { if (c.g !== g) { g = c.g; if (CG[g].name) { left.push({head: CG[g].name, y}); y += rowH; } } left.push({c: r, y}); y += rowH; });
+  const H1 = y; y = top; g = -1;
+  T.forEach((t, i) => { if (t.g !== g) { g = t.g; right.push({head: TG[g].name, y, g}); y += rowH; } right.push({t: i, y}); y += rowH; });
+  const H = Math.max(H1, y) + 10, off = (H - 10 - y) / 2;
+  right.forEach(r => r.y += off);
+  const Wd = 980, LX = 330, RX = Wd - 230, cy = {}, ty = {};
+  left.forEach(r => r.c != null && (cy[r.c] = r.y));
+  right.forEach(r => r.t != null && (ty[r.t] = r.y));
+  let s = `<svg viewBox="0 0 ${Wd} ${H}" role="img">`;
+  Object.entries(L).forEach(([k, x]) => {
+    const [c, t] = k.split(',').map(Number), y1 = cy[c] - 4, y2 = ty[t] - 4, m = (LX + RX) / 2;
+    s += `<path data-c="${c}" data-t="${t}" d="M${LX + 6},${y1} C${m},${y1} ${m},${y2} ${RX - 10},${y2}" stroke="${col(t)}" stroke-width="${(0.8 + Math.log2(1 + x.n) * 0.7).toFixed(2)}"/>`;
+  });
+  const cut = s => s.length > 22 ? s.slice(0, 22) + '…' : s;
+  left.forEach(r => s += r.head != null ? `<text class="gh" x="${LX}" y="${r.y}" text-anchor="end">${esc(r.head)}</text>`
+    : `<text data-c="${r.c}" x="${LX}" y="${r.y}" text-anchor="end">${esc(cut(C[r.c].label))}${C[r.c].prefix ? '  ' + esc(C[r.c].prefix) : ''}</text>`);
+  right.forEach(r => s += r.head != null ? `<text class="gh" x="${RX}" y="${r.y}" style="fill:${TG[r.g].color}">${esc(r.head)}</text>`
+    : `<text data-t="${r.t}" x="${RX}" y="${r.y}" style="fill:${col(r.t)}">● ${esc(T[r.t].name)}</text>`);
+  const el = document.getElementById('graph');
+  el.innerHTML = `<p class="empty" style="margin:0 0 6px">${esc(W.hover)}</p>${s}</svg>`;
+  const svg = el.querySelector('svg');
+  const pick = e => e.target.closest('text[data-c],text[data-t]');
+  svg.addEventListener('mouseover', e => { const x = pick(e); if (x) graphFocus(x.dataset.c != null ? +x.dataset.c : null, x.dataset.t != null ? +x.dataset.t : null, true); });
+  svg.addEventListener('mouseleave', () => graphFocus(G.c, G.t, true));
+  svg.addEventListener('click', e => { const x = pick(e); if (x) x.dataset.c != null ? showCat(+x.dataset.c) : showTag(+x.dataset.t); });
+}
+function graphFocus(c, t, hover) {
+  if (!hover) G = {c, t};
+  const el = document.getElementById('graph'), any = c != null || t != null, lt = new Set(), lc = new Set();
+  Object.keys(L).forEach(k => { const [a, b] = k.split(',').map(Number); if (a === c) lt.add(b); if (b === t) lc.add(a); });
+  el.querySelectorAll('path').forEach(p => {
+    const on = (c == null || +p.dataset.c === c) && (t == null || +p.dataset.t === t);
+    p.classList.toggle('faded', any && !on); p.classList.toggle('lit', any && on);
+  });
+  el.querySelectorAll('text[data-c]').forEach(x => x.classList.toggle('faded', any && !(+x.dataset.c === c || lc.has(+x.dataset.c))));
+  el.querySelectorAll('text[data-t]').forEach(x => x.classList.toggle('faded', any && !(+x.dataset.t === t || lt.has(+x.dataset.t))));
+}
+
+function buildTree() {
+  let h = '', g = -1;
+  C.forEach((c, r) => {
+    if (c.g !== g) { if (g >= 0) h += '</ul></details>'; g = c.g; h += `<details open><summary>${esc(CG[g].name || W.category)}</summary><ul>`; }
+    h += `<li><span class="ci" data-c="${r}"><b>${esc(c.prefix)}</b> ${esc(c.label)}</span>${c.meta ? ` <span class="meta">· ${esc(c.meta)}</span>` : ''}`;
+    if (c.kids.length) h += '<ul>' + c.kids.map(k => `<li>${esc(k)}</li>`).join('') + '</ul>';
+    h += '</li>';
+  });
+  const el = document.getElementById('tree');
+  el.innerHTML = h + '</ul></details>';
+  el.onclick = e => { const x = e.target.closest('.ci'); if (x) showCat(+x.dataset.c); };
+}
+
+function buildTags() {
+  let h = '';
+  TG.forEach((g, k) => {
+    h += `<div class="tg"><h3 style="color:${g.color}">${esc(g.name)}</h3><div class="chips">`;
+    T.forEach((t, i) => {
+      if (t.g !== k) return;
+      const n = C.filter((c, r) => link(r, i)).length;
+      h += `<button class="chip" data-t="${i}" title="${esc(t.crit)}">${esc(t.name)}<b>${n}${esc(W.cats)}</b></button>`;
+    });
+    h += '</div></div>';
+  });
+  const el = document.getElementById('tags');
+  el.innerHTML = h + `<p class="note">${esc(W.count_note)}</p>`;
+  el.onclick = e => { const x = e.target.closest('.chip'); if (x) showTag(+x.dataset.t); };
+}
+
+const P = document.getElementById('panel');
+const notes = (c, t, max) => {
+  const x = link(c, t), list = x.notes.length ? x.notes.slice(0, max) : [W.no_notes];
+  return list.map(s => `<div class="snip" style="border-color:${col(t)}"><span class="where">${esc(cname(C[c]))} · ${esc(T[t].name)}</span>${esc(s)}</div>`).join('');
+};
+function showCat(r) {
+  const c = C[r], ts = T.map((t, i) => i).filter(i => link(r, i)).sort((a, b) => link(r, b).n - link(r, a).n);
+  P.innerHTML = `<h2>${esc(cname(c))}</h2><div class="meta">${esc(CG[c.g].name)}${c.meta ? ' · ' + esc(c.meta) : ''}</div>`
+    + (c.kids.length ? '<ul style="margin:0 0 8px;padding-left:18px">' + c.kids.map(k => `<li>${esc(k)}</li>`).join('') + '</ul>' : '')
+    + `<div class="meta">${esc(W.linked)} ${ts.length}</div><div class="chips">`
+    + ts.map(i => `<button class="chip" data-cell="${r},${i}" style="border-color:${col(i)}">${esc(T[i].name)}<b>${link(r, i).n}</b></button>`).join('') + '</div>';
+  highlight(r, null);
+}
+function showTag(i) {
+  const cs = C.map((c, r) => r).filter(r => link(r, i)), total = cs.reduce((a, r) => a + link(r, i).n, 0);
+  P.innerHTML = `<h2 style="color:${col(i)}">${esc(T[i].name)}</h2><div class="meta">${esc(TG[T[i].g].name)} · ${cs.length}${esc(W.cats)} ${esc(W.category)} · ${total}${esc(W.times)}</div>`
+    + (T[i].crit ? `<div class="crit"><b>${esc(W.criteria)}</b> ${esc(T[i].crit)}</div>` : '')
+    + `<div class="meta">${esc(W.gather)}</div>` + cs.map(r => notes(r, i, 2)).join('');
+  highlight(null, i);
+}
+function showCell(r, i) {
+  P.innerHTML = `<h2>${esc(cname(C[r]))} × <span style="color:${col(i)}">${esc(T[i].name)}</span></h2><div class="meta">${link(r, i).n}${esc(W.times)}</div>`
+    + notes(r, i, 5) + `<div class="chips"><button class="chip" data-tag="${i}">${esc(W.all_tag)}</button><button class="chip" data-ch="${r}">${esc(W.this_cat)}</button></div>`;
+  highlight(r, i);
+}
+P.onclick = e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  if (b.dataset.cell) { const [r, i] = b.dataset.cell.split(',').map(Number); showCell(r, i); }
+  else if (b.dataset.tag) showTag(+b.dataset.tag);
+  else if (b.dataset.ch) showCat(+b.dataset.ch);
+};
+buildMatrix(); buildGraph(); buildTree(); buildTags();
+
+</script>
+</body>
+</html>

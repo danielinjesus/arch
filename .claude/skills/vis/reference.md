@@ -1,6 +1,11 @@
 # Spec reference
 
-A spec is YAML (or JSON). Only `nodes` is required.
+A spec is YAML (or JSON). `kind:` picks the picture: `arch` (default), `xref`, `mindmap` or `graph`.
+The arch format comes first; the other three are at the end.
+
+## arch
+
+Only `nodes` is required.
 
 ```yaml
 title: Name of the system            # big, top left
@@ -100,7 +105,7 @@ the node it points to.
 | users | people, team |
 | video | media, stream, youtube |
 
-`draw.py --gallery -o icons` draws them all.
+`vis.py --gallery -o icons` draws them all.
 
 ## Layout
 
@@ -110,3 +115,77 @@ box that no other node enters. An arrow that would cross a node takes a free lan
 
 When auto layout cannot avoid a problem, the renderer prints a `WARN` line. Pin columns with `col:` first; use
 `layout: manual` only for full control.
+
+## xref
+
+Categories (vertical knowledge, with groups) down the side, tags (horizontal knowledge, with groups) across the top.
+Each link joins one category to one tag and carries the sentences that made the link.
+
+```yaml
+kind: xref
+title: Handbook rules map
+subtitle: one line
+source: {label: Where the text comes from, url: https://example.com}   # optional, under the title
+steps:                                   # optional strip of process steps; here: true highlights one
+  - {label: Taxonomy, sub: chapters + criteria, here: true}
+words: {category: chapter, cats: ""}     # optional UI words (category, tag, cats, times, ...)
+categories:
+  - group: People                        # a heading in the matrix and the tree
+    items:
+      - {id: leave, prefix: "2", label: Leave, meta: 3 rules, children: [Annual, Sick]}
+      - Plain label                      # short form: id = label
+tags:
+  - group: Time
+    color: sky                           # the group colour (palette name or #RRGGBB)
+    items:
+      - {id: notice, name: Notice period, criteria: how far ahead someone must be told}
+links:
+  - {category: leave, tag: notice, notes: ["Tell the manager 2 weeks ahead."]}
+  - {category: leave, tag: notice, weight: 4}   # weight = dot size (default: number of notes, or 1)
+note: footnote under the page
+```
+
+Views: matrix (dot size = weight), relation graph (hover keeps one name's links), category tree (children are
+bullets), tag list (count = categories the tag touches). Clicking gathers the linked notes in the side panel.
+
+## mindmap
+
+```yaml
+kind: mindmap
+title: Which picture?
+open: 2                                  # levels open at start (default: all)
+root:
+  label: vis
+  children:
+    - label: arch
+      note: shown in the side panel
+      url: https://example.com           # a link in the side panel
+      color: orange                      # first-level branches get a colour each; children inherit it
+      children: [Icons, Arrows]
+    - {Short form: [child one, child two]}
+    - A leaf
+```
+
+Click a node to open it; click it again to close it. Search opens the path to every match.
+
+## graph
+
+```yaml
+kind: graph
+title: How it is built
+directed: true                           # default; false draws plain lines
+groups:
+  core: {label: Core, color: purple}
+nodes:
+  cli: {label: cli, group: core, size: 2, note: shown on click, url: https://example.com}
+  b: Plain label
+edges:
+  - cli -> b: label                      # arrow
+  - cli <-> b                            # both ways
+  - cli --> b                            # dashed
+  - cli -- b                             # no arrowhead
+  - {from: cli, to: b, label: calls, weight: 3}   # weight = line width
+```
+
+Drag a node to pin it, drag the background to pan, wheel to zoom. The legend hides a group; "Edge labels" shows
+every label (otherwise only a selected node's).

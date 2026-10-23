@@ -1,12 +1,14 @@
 {
-  "name": "arch",
-  "description": "Cartoon architecture diagrams for Claude Code",
-  "owner": { "name": "danielinjesus" },
+  "name": "vis",
+  "description": "Diagrams, cross-reference maps, mind maps and graphs for Claude Code",
+  "owner": {
+    "name": "danielinjesus"
+  },
   "plugins": [
     {
-      "name": "arch",
+      "name": "vis",
       "source": "./",
-      "description": "Draw a colourful architecture diagram of a repo or Azure deployment: /arch:draw"
+      "description": "Architecture diagrams, cross-reference maps, mind maps and network graphs from a short spec: /vis:vis"
     }
   ]
 }

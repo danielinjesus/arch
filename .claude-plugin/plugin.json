@@ -1,10 +1,23 @@
 {
-  "name": "arch",
-  "displayName": "Arch: cartoon architecture diagrams",
-  "version": "0.1.0",
-  "description": "Draws colourful cartoon architecture diagrams (HTML with doc links, SVG, PNG) from the core entities of a codebase or cloud deployment.",
-  "author": { "name": "danielinjesus" },
-  "repository": "https://github.com/danielinjesus/arch",
-  "keywords": ["architecture", "diagram", "azure", "svg", "png"],
-  "skills": ["./.claude/skills/"]
+  "name": "vis",
+  "displayName": "vis: diagrams, cross-reference maps, mind maps, graphs",
+  "version": "0.2.0",
+  "description": "Pictures from a short spec: cartoon architecture diagrams (HTML, SVG, PNG), category x tag cross-reference maps, collapsible mind maps and interactive network graphs (HTML, PNG).",
+  "author": {
+    "name": "danielinjesus"
+  },
+  "repository": "https://github.com/danielinjesus/vis",
+  "keywords": [
+    "visualization",
+    "diagram",
+    "architecture",
+    "mindmap",
+    "graph",
+    "cross-reference",
+    "svg",
+    "png"
+  ],
+  "skills": [
+    "./.claude/skills/"
+  ]
 }
