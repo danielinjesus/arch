@@ -67,6 +67,22 @@ All HTML is one self-contained file (no CDN), light and dark, works at phone wid
 	- If the page does not say what colours, sizes and lines mean, say it in one sentence
 
 
+7. Overview map of a whole course or platform (owner's rules, 2026-10-25)
+
+	- Use when one page must show the whole flow of a course or platform so a non-specialist gets it at a glance
+	- arch cannot do this (cartoon icons only, no hover box). Hand-write one HTML: copy examples/gcp-data-pipeline (build.py fills template.html)
+	- Title = the purpose of the whole thing in one sentence, e.g. "데이터 파이프라인: 흩어진 데이터를 모아, 다듬고, 쌓아, 쓰게 만든다"
+	- Stages of the flow as columns, left to right, joined by one flowing pipe. Cross-cutting concerns (orchestration, governance) as bands underneath
+	- Only the big pieces, about 4 per stage. Intuitive first: the reader is not a specialist
+	- Every item: bold name above the icon (nobody knows what an icon means), the original abbreviation or former name under it, a short pill with where it sends data or its role ("→ BigQuery 전용", "→ 어디로든")
+	- What it does and why it is needed: on screen only if there is room. Otherwise a yellow box that appears on hover (shown inline on touch screens)
+	- Official product icons, embedded as data URIs. Google Cloud: C:\Users\aidan\OneDrive - Daun Lee\커리어\GCP\Google Architecture
+	- Hover: the item comes slightly closer and sparkles. Click: the official doc opens in a new tab (target=_blank rel=noopener)
+	- Check every doc URL returns 200 and write the final URL after redirects. Use current official product names from the docs
+	- Fits one 1920x1080 screen, shrinks to fit a laptop, stacks on a phone. White background; dark only by a button
+	- Check: screenshots at 1920, 1440 and 390 wide, a hover state, and one click that opens a new tab
+
+
 Common mistakes
 
 	- Sentences as labels. Labels are 1-4 words; detail goes to role:, note: or notes:
