@@ -68,33 +68,32 @@ def korean(*parts) -> bool:
 
 
 BASE_CSS = """
-:root{--bg:#f7f5ef;--card:#fff;--ink:#1e1b2e;--sub:#5f6472;--line:#e3dfd5;--soft:#efece4;--accent:#3a5bd9}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#17151f;--card:#211f2b;--ink:#efeae0;--sub:#a9a6b4;--line:#34313f;--soft:#2a2835;--accent:#8fa8ff}}
+:root{--bg:#ffffff;--card:#ffffff;--ink:#18181b;--sub:#52525b;--line:#e4e4e7;--soft:#f4f4f5;--accent:#2563eb}
 :root[data-theme="dark"]{--bg:#17151f;--card:#211f2b;--ink:#efeae0;--sub:#a9a6b4;--line:#34313f;--soft:#2a2835;--accent:#8fa8ff}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink)}
-body{font:15px/1.55 "Pretendard","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif}
-header{max-width:1440px;margin:0 auto;padding:22px 24px 6px}
-h1{font-size:22px;margin:0 0 4px;letter-spacing:-.3px}
-.lead{color:var(--sub);margin:0;font-size:14px}
+body{font:16px/1.6 "Pretendard","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif}
+header{max-width:1560px;margin:0 auto;padding:20px 24px 6px}
+h1{font-size:28px;margin:0 0 4px;letter-spacing:-.4px}
+.lead{color:var(--sub);margin:0;font-size:16px}
 .lead a,.panel a{color:var(--accent)}
-.bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;max-width:1440px;margin:10px auto 0;padding:0 24px}
-.bar button,.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 13px;border-radius:999px;cursor:pointer;font:inherit;font-size:13.5px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;max-width:1560px;margin:10px auto 0;padding:0 24px}
+.bar button,.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 14px;border-radius:999px;cursor:pointer;font:inherit;font-size:14.5px}
 .bar button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.bar input{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 13px;font:inherit;font-size:13.5px;min-width:180px}
+.bar input{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 14px;font:inherit;font-size:14.5px;min-width:200px}
 .chip b{font-weight:600;margin-left:4px;color:var(--sub)}
 .chip:hover,.bar button:hover{border-color:var(--ink)}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
-.wrap{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;max-width:1440px;margin:12px auto 40px;padding:0 24px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
-.panel{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
-.panel h2{font-size:17px;margin:0 0 2px}
-.meta{color:var(--sub);font-size:13px;margin-bottom:8px}
-.empty{color:var(--sub);font-size:14px;margin:0}
-.note{font-size:12.5px;color:var(--sub);border-top:1px solid var(--line);margin-top:12px;padding-top:8px}
-.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:13px;color:var(--sub);margin:0 0 10px}
-.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
-.foot{max-width:1440px;margin:-28px auto 30px;padding:0 24px;color:var(--sub);font-size:12.5px}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;max-width:1560px;margin:12px auto 32px;padding:0 24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.panel{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;font-size:16px}
+.panel h2{font-size:21px;margin:0 0 4px}
+.meta{color:var(--sub);font-size:14px;margin-bottom:10px}
+.empty{color:var(--sub);font-size:16px;margin:0}
+.note{font-size:14px;color:var(--sub);border-top:1px solid var(--line);margin-top:12px;padding-top:8px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:14.5px;color:var(--ink);font-weight:500;margin:0 0 4px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.foot{max-width:1560px;margin:-20px auto 24px;padding:0 24px;color:var(--sub);font-size:14px}
 @media (max-width:900px){
   .wrap{grid-template-columns:minmax(0,1fr);padding:0 16px}
   header,.bar,.foot{padding-left:16px;padding-right:16px}
