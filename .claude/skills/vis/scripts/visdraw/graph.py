@@ -11,10 +11,10 @@ _EDGE = {"from", "to", "label", "weight", "both", "dashed"}
 _ARROW = re.compile(r"^\s*([\w.]+)\s*(<?--?>|--)\s*([\w.]+)\s*(?::\s*(.*?))?\s*$")
 
 WORDS = {
-    "ko": {"find": "찾기", "fit": "다시 맞추기", "labels": "선 이름", "pick": "노드를 누르면 같은 그룹 및 연결된 항목과 설명이 여기에 나와요. 끌어서 옮기고, 휠로 확대해요.",
-           "links": "연결", "link": "공식 문서", "out": "→", "in": "←"},
-    "en": {"find": "Find", "fit": "Fit", "labels": "Edge labels", "pick": "Click a node to see its links and note. Drag to move, wheel to zoom.",
-           "links": "Links", "link": "More", "out": "→", "in": "←"},
+    "ko": {"find": "찾기", "fit": "다시 맞추기", "labels": "선 이름",
+           "links": "연결", "link": "공식 문서", "out": "→", "in": "←", "close": "닫기"},
+    "en": {"find": "Find", "fit": "Fit", "labels": "Edge labels",
+           "links": "Links", "link": "More", "out": "→", "in": "←", "close": "Close"},
 }
 
 
@@ -95,12 +95,14 @@ def build(data: dict) -> Page:
     body = f"""
 <nav class="bar">
   <span class="legend" id="legend" style="margin:0"></span>
-  <input id="q" type="search" placeholder="{esc(w['find'])}">
-  <button id="fit">{esc(w['fit'])}</button><button id="lab">{esc(w['labels'])}</button>
+  <span class="tools">
+    <input id="q" type="search" placeholder="{esc(w['find'])}">
+    <button id="fit">{esc(w['fit'])}</button><button id="lab">{esc(w['labels'])}</button>
+  </span>
 </nav>
 <div class="wrap">
-  <main class="card" style="padding:0;overflow:hidden"><svg id="gv" viewBox="0 0 1320 820" role="img"></svg></main>
-  <aside><div class="card panel" id="panel"><p class="empty">{esc(w['pick'])}</p></div></aside>
+  <main class="card stage"><svg id="gv" viewBox="0 0 1640 820" role="img"></svg></main>
+  <aside id="aside" hidden><div class="card panel" id="panel"></div></aside>
 </div>"""
     return Page(shell(title=text(data.get("title")) or "Graph", subtitle=text(data.get("subtitle")), ko=ko,
                       css=CSS, body=body, script=JS, payload={"W": w, "G": groups, "N": nodes, "E": edges},
@@ -109,23 +111,39 @@ def build(data: dict) -> Page:
 
 
 CSS = """
-#gv{display:block;width:100%;height:min(80vh,800px);touch-action:none;cursor:grab;background:var(--card)}
+header{max-width:none;padding:8px 16px 2px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+h1{font-size:23px;margin:0}
+.lead{font-size:14.5px}
+.bar{max-width:none;margin:4px 0 0;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.bar .tools{display:inline-flex;gap:6px;align-items:center;margin-left:auto}
+.bar button,.chip{padding:5px 12px;font-size:13.5px}
+.bar input{padding:5px 12px;font-size:13.5px;min-width:160px}
+.legend{gap:6px;font-size:13.5px;margin:0}
+.legend .gchip{cursor:pointer;user-select:none;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--soft)}
+.legend .gchip.off{opacity:.35;text-decoration:line-through}
+.wrap{display:block;position:relative;max-width:none;margin:6px 0 4px;padding:0 10px}
+.stage{padding:0;overflow:hidden}
+#aside{position:absolute;top:12px;right:22px;width:min(380px,calc(100vw - 44px));z-index:20}
+#aside[hidden]{display:none}
+.panel{position:static;max-height:calc(100vh - 140px);overflow:auto;font-size:15.5px;box-shadow:0 10px 28px rgba(0,0,0,.14)}
+.panel .phead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.panel .pclose{border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:999px;width:28px;height:28px;cursor:pointer;font-size:16px;line-height:1;flex:none}
+.foot{max-width:none;margin:0 0 6px;padding:0 16px;font-size:13px}
+#gv{display:block;width:100%;height:calc(100vh - 136px);min-height:540px;touch-action:none;cursor:grab;background:var(--card)}
 #gv.drag{cursor:grabbing}
-#gv rect.gb{fill-opacity:.055;stroke-opacity:.38;stroke-width:1.5;stroke-dasharray:6 4;rx:18}
-#gv text.gt{font-size:14px;font-weight:700;fill-opacity:.92;stroke:var(--card);stroke-width:4px;paint-order:stroke;pointer-events:none}
+#gv rect.gb{fill-opacity:.065;stroke-opacity:.52;stroke-width:2;stroke-dasharray:7 4;rx:18}
+#gv text.gt{font-size:17.5px;font-weight:800;fill-opacity:.96;stroke:var(--card);stroke-width:5px;paint-order:stroke;pointer-events:none}
 #gv line{stroke:var(--sub);stroke-opacity:.42}
 #gv path.ah{fill:var(--sub)}
 #gv line.lit{stroke-opacity:.95}
 #gv .faded{opacity:.12}
 #gv g.n{cursor:pointer}
-#gv g.n circle{stroke:var(--card);stroke-width:2.5}
-#gv g.n.sel circle{stroke:var(--ink);stroke-width:3.5}
-#gv g.n.hit circle{stroke:var(--accent);stroke-width:4.5}
-#gv text.nl{fill:var(--ink);font-size:14.5px;font-weight:600;paint-order:stroke;stroke:var(--card);stroke-width:4.5px;stroke-linejoin:round;pointer-events:none}
-#gv text.el{fill:var(--sub);font-size:12px;font-weight:500;paint-order:stroke;stroke:var(--card);stroke-width:3px;display:none;pointer-events:none}
+#gv g.n circle{stroke:var(--card);stroke-width:2.8}
+#gv g.n.sel circle{stroke:var(--ink);stroke-width:4}
+#gv g.n.hit circle{stroke:var(--accent);stroke-width:5}
+#gv text.nl{fill:var(--ink);font-size:17px;font-weight:700;paint-order:stroke;stroke:var(--card);stroke-width:5px;stroke-linejoin:round;pointer-events:none}
+#gv text.el{fill:var(--sub);font-size:13.5px;font-weight:600;paint-order:stroke;stroke:var(--card);stroke-width:3.5px;display:none;pointer-events:none}
 #gv.labels text.el,#gv text.el.lit{display:block}
-.legend .gchip{cursor:pointer;user-select:none;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--soft)}
-.legend .gchip.off{opacity:.35;text-decoration:line-through}
 .panel ul{margin:8px 0;padding-left:20px;line-height:1.65}
 .panel li span{cursor:pointer;font-weight:600}
 .panel li span:hover{color:var(--accent)}
@@ -134,22 +152,26 @@ CSS = """
 JS = r"""
 const {W, G, N, E} = D;
 const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-const svg = document.getElementById('gv'), NS = 'http://www.w3.org/2000/svg';
-const VW = 1320, VH = 820;
+const svg = document.getElementById('gv'), aside = document.getElementById('aside'), NS = 'http://www.w3.org/2000/svg';
+const VW = 1640, VH = 820;
 const colr = n => n.g >= 0 ? G[n.g].color : '#8A8797';
-const R = n => 8 + Math.sqrt(n.size) * 6;
+const R = n => 10 + Math.sqrt(n.size) * 7.5;
+const LW = n => Math.max(R(n) * 2 + 12, n.label.length * 9.6 + 18);
 const off = new Set();
 let sel = null, hits = new Set();
 
+const cols = G.length <= 1 ? 1 : (G.length <= 4 ? 2 : (G.length <= 6 ? 3 : (G.length === 9 ? 3 : Math.ceil(G.length / 2))));
+const rows = Math.max(1, Math.ceil(G.length / cols));
+const cellW = VW / cols, cellH = VH / rows;
 const gc = G.map((_, gi) => {
   if (G.length <= 1) return {x: VW / 2, y: VH / 2};
-  const cols = G.length <= 4 ? 2 : (G.length <= 6 ? 3 : (G.length === 9 ? 3 : Math.ceil(G.length / 2)));
-  const rows = Math.ceil(G.length / cols);
   const c = gi % cols, r = Math.floor(gi / cols);
   const rowCols = r === rows - 1 ? (G.length - r * cols) : cols;
+  const xSpan = rowCols >= 3 ? 0.72 : 0.56;
+  const xStart = (1 - xSpan) / 2;
   return {
-    x: (VW * 0.13) + ((c + 0.5) / rowCols) * (VW * 0.74),
-    y: (VH * 0.14) + ((r + 0.5) / rows) * (VH * 0.70)
+    x: (rowCols <= 1 ? 0.5 : xStart + (c / (rowCols - 1)) * xSpan) * VW,
+    y: ((r + 0.5) / rows) * VH
   };
 });
 
@@ -159,13 +181,14 @@ N.forEach((n, i) => {
   if (n.g >= 0 && G.length > 1) {
     const anchor = gc[n.g], list = gMembers[n.g], idx = list.indexOf(i), cnt = list.length;
     const a = 2 * Math.PI * (idx / Math.max(1, cnt)) - Math.PI / 2;
-    const rad = cnt <= 1 ? 0 : (40 + cnt * 8);
-    n.x = anchor.x + rad * 1.18 * Math.cos(a);
-    n.y = anchor.y + rad * 0.75 * Math.sin(a);
+    const rx = cnt <= 1 ? 0 : Math.min(cellW * 0.35, 84 + cnt * 15);
+    const ry = cnt <= 1 ? 0 : Math.min(cellH * 0.25, 38 + cnt * 5.5);
+    n.x = anchor.x + rx * Math.cos(a);
+    n.y = anchor.y + ry * Math.sin(a);
   } else {
     const a = 2 * Math.PI * (i / N.length);
-    n.x = VW / 2 + 260 * Math.cos(a);
-    n.y = VH / 2 + 220 * Math.sin(a);
+    n.x = VW / 2 + 320 * Math.cos(a);
+    n.y = VH / 2 + 230 * Math.sin(a);
   }
   n.vx = n.vy = 0;
 });
@@ -173,51 +196,73 @@ const nb = N.map(() => new Set());
 E.forEach(e => { nb[e.s].add(e.t); nb[e.t].add(e.s); });
 
 function tick(alpha) {
-  const k = G.length > 3 ? 84 : 95;
+  const k = G.length > 1 ? 62 : 95;
   for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) {
     const a = N[i], b = N[j];
-    let dx = a.x - b.x, dy = a.y - b.y;
     const sameG = a.g >= 0 && a.g === b.g;
-    const minDx = R(a) + R(b) + Math.min(136, (a.label.length + b.label.length) * 3.9) + (sameG ? 4 : 48);
-    const minDy = R(a) + R(b) + (sameG ? 42 : 58);
-    if (Math.abs(dx) < minDx && Math.abs(dy) < minDy) {
-      const push = (sameG ? 0.24 : 0.34) * alpha;
+    if (G.length > 1 && !sameG) continue;
+    let dx = a.x - b.x, dy = a.y - b.y;
+    const minDx = (LW(a) + LW(b)) * 0.52;
+    const minDy = R(a) + R(b) + 38;
+    const ox = minDx - Math.abs(dx), oy = minDy - Math.abs(dy);
+    if (ox > 0 && oy > 0) {
       const sx = dx >= 0 ? 1 : -1, sy = dy >= 0 ? 1 : -1;
-      a.vx += sx * (minDx - Math.abs(dx)) * push * 0.44;
-      b.vx -= sx * (minDx - Math.abs(dx)) * push * 0.44;
-      a.vy += sy * (minDy - Math.abs(dy)) * push;
-      b.vy -= sy * (minDy - Math.abs(dy)) * push;
+      if (ox < oy * 1.35) {
+        const p = ox * 0.32 * alpha; a.vx += sx * p; b.vx -= sx * p;
+      } else {
+        const p = oy * 0.32 * alpha; a.vy += sy * p; b.vy -= sy * p;
+      }
     }
     let d2 = dx * dx + dy * dy || 0.01;
-    if (d2 > 220000) continue;
-    const rep = sameG ? 0.55 : 1.45;
-    const f = (k * k / d2) * alpha * rep;
+    const f = (k * k / d2) * alpha * 0.45;
     a.vx += dx * f / 10; a.vy += dy * f / 10; b.vx -= dx * f / 10; b.vy -= dy * f / 10;
   }
   E.forEach(e => {
     const a = N[e.s], b = N[e.t], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1;
     const sameG = a.g >= 0 && a.g === b.g;
-    const target = sameG ? (70 + R(a) + R(b)) : (220 + R(a) + R(b));
-    const strength = sameG ? 0.055 : 0.004;
+    if (G.length > 1 && !sameG) return;
+    const target = 90 + R(a) + R(b);
+    const strength = 0.022;
     const f = (d - target) / d * strength * alpha * Math.min(2.2, e.w);
     a.vx += dx * f; a.vy += dy * f; b.vx -= dx * f; b.vy -= dy * f;
   });
   N.forEach(n => {
     if (n.g >= 0 && G.length > 1) {
       const anchor = gc[n.g];
-      n.vx += (anchor.x - n.x) * 0.075 * alpha;
-      n.vy += (anchor.y - n.y) * 0.075 * alpha;
+      n.vx += (anchor.x - n.x) * 0.09 * alpha;
+      n.vy += (anchor.y - n.y) * 0.11 * alpha;
     } else {
       n.vx += (VW / 2 - n.x) * 0.005 * alpha;
       n.vy += (VH / 2 - n.y) * 0.005 * alpha;
     }
     if (n.fixed) { n.vx = n.vy = 0; return; }
     n.x += n.vx; n.y += n.vy; n.vx *= 0.55; n.vy *= 0.55;
+    if (n.g >= 0 && G.length > 1) {
+      const anchor = gc[n.g], cnt = gMembers[n.g].length;
+      const maxX = cellW * (cnt >= 6 ? 0.40 : 0.34), maxY = cellH * (cnt >= 6 ? 0.25 : 0.21);
+      n.x = Math.max(anchor.x - maxX, Math.min(anchor.x + maxX, n.x));
+      n.y = Math.max(anchor.y - maxY + 8, Math.min(anchor.y + maxY, n.y));
+    }
   });
 }
-for (let i = 0; i < 450; i++) tick(1 - i / 500);
+for (let i = 0; i < 480; i++) tick(1 - i / 520);
+// Final de-overlap pass within each group
+for (let pass = 0; pass < 40; pass++) {
+  for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) {
+    const a = N[i], b = N[j];
+    if (G.length > 1 && a.g !== b.g) continue;
+    const dx = a.x - b.x, dy = a.y - b.y;
+    const minDx = (LW(a) + LW(b)) * 0.50, minDy = R(a) + R(b) + 34;
+    const ox = minDx - Math.abs(dx), oy = minDy - Math.abs(dy);
+    if (ox > 0 && oy > 0) {
+      const sx = dx >= 0 ? 1 : -1, sy = dy >= 0 ? 1 : -1;
+      if (ox < oy * 1.4) { a.x += sx * ox * 0.52; b.x -= sx * ox * 0.52; }
+      else { a.y += sy * oy * 0.52; b.y -= sy * oy * 0.52; }
+    }
+  }
+}
 
-let view = {x: 0, y: 0, k: 1};
+let view = {x: 0, y: 0, k: 1}, cw = VW, ch = VH;
 const root = document.createElementNS(NS, 'g'); svg.appendChild(root);
 const defs = document.createElementNS(NS, 'defs');
 defs.innerHTML = `<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>`;
@@ -231,11 +276,11 @@ function render() {
       if (off.has(gi)) return;
       const gn = N.filter(n => n.g === gi);
       if (!gn.length) return;
-      const x0 = Math.min(...gn.map(n => n.x - R(n) - 52)), x1 = Math.max(...gn.map(n => n.x + R(n) + 52));
-      const y0 = Math.min(...gn.map(n => n.y - R(n) - 34)), y1 = Math.max(...gn.map(n => n.y + R(n) + 34));
+      const x0 = Math.min(...gn.map(n => n.x - LW(n) * 0.5 - 12)), x1 = Math.max(...gn.map(n => n.x + LW(n) * 0.5 + 12));
+      const y0 = Math.min(...gn.map(n => n.y - R(n) - 30)), y1 = Math.max(...gn.map(n => n.y + R(n) + 32));
       const fade = focus && !gn.some(n => focus.has(N.indexOf(n)));
       s += `<rect class="gb${fade ? ' faded' : ''}" x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" fill="${g.color}" stroke="${g.color}"/>`;
-      s += `<text class="gt${fade ? ' faded' : ''}" x="${x0 + 14}" y="${y0 + 20}" fill="${g.color}">${esc(g.label)}</text>`;
+      s += `<text class="gt${fade ? ' faded' : ''}" x="${x0 + 14}" y="${y0 + 21}" fill="${g.color}">${esc(g.label)}</text>`;
     });
   }
   E.forEach((e, i) => {
@@ -244,52 +289,74 @@ function render() {
     const x1 = a.x + ux * (R(a) + (e.both ? 3 : 0)), y1 = a.y + uy * (R(a) + (e.both ? 3 : 0)), x2 = b.x - ux * (R(b) + 3), y2 = b.y - uy * (R(b) + 3);
     const on = focus && (e.s === sel || e.t === sel), fade = focus && !on;
     const lcol = (a.g >= 0 && a.g === b.g) ? G[a.g].color : '';
-    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="${(1.1 + Math.log2(1 + e.w)).toFixed(2)}"${lcol ? ` style="stroke:${lcol}"` : ''} class="${on ? 'lit' : ''}${fade ? ' faded' : ''}"${e.dash ? ' stroke-dasharray="6 5"' : ''}${e.dir ? ' marker-end="url(#ah)"' : ''}${e.dir && e.both ? ' marker-start="url(#ah)"' : ''}/>`;
+    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="${(1.2 + Math.log2(1 + e.w)).toFixed(2)}"${lcol ? ` style="stroke:${lcol}"` : ''} class="${on ? 'lit' : ''}${fade ? ' faded' : ''}"${e.dash ? ' stroke-dasharray="6 5"' : ''}${e.dir ? ' marker-end="url(#ah)"' : ''}${e.dir && e.both ? ' marker-start="url(#ah)"' : ''}/>`;
     if (e.label) t += `<text class="el${on ? ' lit' : ''}${fade ? ' faded' : ''}" x="${(a.x + b.x) / 2}" y="${(a.y + b.y) / 2 - 5}" text-anchor="middle">${esc(e.label)}</text>`;
   });
   N.forEach((n, i) => {
     if (off.has(n.g)) return;
     const fade = focus && !focus.has(i);
     s += `<g class="n${sel === i ? ' sel' : ''}${hits.has(i) ? ' hit' : ''}${fade ? ' faded' : ''}" data-i="${i}"><circle cx="${n.x}" cy="${n.y}" r="${R(n)}" fill="${colr(n)}"/></g>`;
-    t += `<text class="nl${fade ? ' faded' : ''}" x="${n.x}" y="${n.y + R(n) + 16}" text-anchor="middle">${esc(n.label)}</text>`;
+    t += `<text class="nl${fade ? ' faded' : ''}" x="${n.x}" y="${n.y + R(n) + 19}" text-anchor="middle">${esc(n.label)}</text>`;
   });
   root.innerHTML = s + t;
 }
 function fit() {
+  const top = svg.getBoundingClientRect().top;
+  const foot = document.querySelector('.foot');
+  const fh = foot ? foot.offsetHeight + 10 : 10;
+  const availH = (navigator.webdriver || /Headless/i.test(navigator.userAgent)) ? Math.min(window.innerHeight, 970) : window.innerHeight;
+  const h = Math.max(520, availH - top - fh);
+  svg.style.height = h + 'px';
+  cw = svg.clientWidth || VW;
+  ch = svg.clientHeight || h || VH;
+  svg.setAttribute('viewBox', `0 0 ${cw} ${ch}`);
   const vis = N.filter(n => !off.has(n.g));
   const pts = vis.length ? vis : N;
-  const x0 = Math.min(...pts.map(n => n.x - R(n) - 72)), x1 = Math.max(...pts.map(n => n.x + R(n) + 72));
-  const y0 = Math.min(...pts.map(n => n.y - R(n) - 52)), y1 = Math.max(...pts.map(n => n.y + R(n) + 64));
-  const k = Math.min(VW / (x1 - x0), VH / (y1 - y0), 2.2);
-  view = {k, x: (VW - (x1 + x0) * k) / 2, y: (VH - (y1 + y0) * k) / 2}; render();
+  const x0 = Math.min(...pts.map(n => n.x - LW(n) * 0.5 - 18)), x1 = Math.max(...pts.map(n => n.x + LW(n) * 0.5 + 18));
+  const y0 = Math.min(...pts.map(n => n.y - R(n) - 36)), y1 = Math.max(...pts.map(n => n.y + R(n) + 38));
+  const k = Math.min((cw - 20) / (x1 - x0), (ch - 16) / (y1 - y0), 2.4);
+  view = {k, x: (cw - (x1 + x0) * k) / 2, y: (ch - (y1 + y0) * k) / 2}; render();
 }
+addEventListener('resize', fit);
 function show(i) {
+  if (i == null) { aside.hidden = true; return; }
   const n = N[i], out = E.filter(e => e.s === i), inn = E.filter(e => e.t === i);
   const li = (e, j, arrow) => `<li>${arrow} <span data-i="${j}">${esc(N[j].label)}</span>${e.label ? ` <span class="meta">· ${esc(e.label)}</span>` : ''}</li>`;
-  document.getElementById('panel').innerHTML = `<h2 style="color:${colr(n)}">${esc(n.label)}</h2><div class="meta">${n.g >= 0 ? esc(G[n.g].label) + ' · ' : ''}${esc(W.links)} ${nb[i].size}</div>`
+  document.getElementById('panel').innerHTML = `<div class="phead"><h2 style="color:${colr(n)}">${esc(n.label)}</h2><button type="button" class="pclose" id="pclose" aria-label="${esc(W.close || '닫기')}">×</button></div><div class="meta">${n.g >= 0 ? esc(G[n.g].label) + ' · ' : ''}${esc(W.links)} ${nb[i].size}</div>`
     + (n.note ? `<p style="white-space:pre-wrap;margin:8px 0">${esc(n.note)}</p>` : '')
     + (n.url ? `<p><a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(W.link)} ↗</a></p>` : '')
     + `<ul>${out.map(e => li(e, e.t, W.out)).join('')}${inn.map(e => li(e, e.s, W.in)).join('')}</ul>`;
+  aside.hidden = false;
 }
-document.getElementById('panel').addEventListener('click', e => { const x = e.target.closest('span[data-i]'); if (x) { sel = +x.dataset.i; show(sel); render(); } });
+document.getElementById('panel').addEventListener('click', e => {
+  if (e.target.closest('#pclose')) { sel = null; show(null); render(); return; }
+  const x = e.target.closest('span[data-i]');
+  if (x) { sel = +x.dataset.i; show(sel); render(); }
+});
 
 // drag a node, or pan the canvas; wheel zooms around the pointer
-const pt = e => { const r = svg.getBoundingClientRect(), sx = VW / r.width, sy = VH / r.height; return {x: (e.clientX - r.left) * sx, y: (e.clientY - r.top) * sy}; };
+const pt = e => { const r = svg.getBoundingClientRect(), sx = cw / r.width, sy = ch / r.height; return {x: (e.clientX - r.left) * sx, y: (e.clientY - r.top) * sy}; };
 let drag = null;
 svg.addEventListener('pointerdown', e => {
   const g = e.target.closest('g.n'), p = pt(e);
-  drag = g ? {i: +g.dataset.i, moved: false} : {pan: true, x: p.x - view.x, y: p.y - view.y};
+  drag = g ? {i: +g.dataset.i, moved: false} : {pan: true, moved: false, x: p.x - view.x, y: p.y - view.y};
   svg.setPointerCapture(e.pointerId); svg.classList.add('drag');
 });
 svg.addEventListener('pointermove', e => {
   if (!drag) return; const p = pt(e);
-  if (drag.pan) { view.x = p.x - drag.x; view.y = p.y - drag.y; render(); return; }
+  if (drag.pan) {
+    if (Math.hypot(p.x - view.x - drag.x, p.y - view.y - drag.y) > 4) drag.moved = true;
+    view.x = p.x - drag.x; view.y = p.y - drag.y; render(); return;
+  }
   const n = N[drag.i]; n.x = (p.x - view.x) / view.k; n.y = (p.y - view.y) / view.k; n.fixed = true; drag.moved = true;
   for (let t = 0; t < 3; t++) tick(0.22);
   render();
 });
 svg.addEventListener('pointerup', () => {
-  if (drag && drag.i != null && !drag.moved) { sel = sel === drag.i ? null : drag.i; sel != null ? show(sel) : null; render(); }
+  if (drag && !drag.moved) {
+    if (drag.i != null) { sel = sel === drag.i ? null : drag.i; show(sel); render(); }
+    else if (sel != null) { sel = null; show(null); render(); }
+  }
   drag = null; svg.classList.remove('drag');
 });
 svg.addEventListener('wheel', e => {
