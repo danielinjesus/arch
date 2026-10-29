@@ -4,8 +4,8 @@ subtitle: the four kinds of vis, and when each one fits
 root:
   label: vis
   children:
-    - label: arch
-      note: Cartoon architecture diagram. HTML with doc links, SVG and PNG for slides and posts.
+    - label: sketch
+      note: Cartoon sketch diagram. HTML with doc links, SVG and PNG for slides and posts.
       children:
         - Core entities as icons
         - Arrows say what each does to the other

@@ -1,4 +1,4 @@
-"""Pictures from a short spec: python vis.py spec.yaml. The spec's `kind:` picks arch, xref, mindmap or graph."""
+"""Pictures from a short spec: python vis.py spec.yaml. The spec's `kind:` picks sketch, xref, mindmap or graph."""
 import os
 import sys
 

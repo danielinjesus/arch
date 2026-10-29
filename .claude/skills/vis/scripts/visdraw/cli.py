@@ -20,11 +20,11 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="vis.py", description=f"Pictures from a short spec. kind: {', '.join(KINDS)}.")
     ap.add_argument("spec", nargs="?", help="spec file (.yaml or .json) with kind: " + "|".join(KINDS))
     ap.add_argument("-o", "--out", help="output path without extension (default: next to the spec)")
-    ap.add_argument("--formats", help="arch: html,svg,png (default all) · other kinds: html,png (default both)")
+    ap.add_argument("--formats", help="sketch: html,svg,png (default all) · other kinds: html,png (default both)")
     ap.add_argument("--scale", type=float, default=2.0, help="PNG pixel scale (default 2)")
     ap.add_argument("--browser", help="Chrome/Edge/Chromium for the PNG (default: found automatically)")
-    ap.add_argument("--icons", action="store_true", help="arch: list icon names and aliases")
-    ap.add_argument("--gallery", action="store_true", help="arch: draw every icon (use with -o)")
+    ap.add_argument("--icons", action="store_true", help="sketch: list icon names and aliases")
+    ap.add_argument("--gallery", action="store_true", help="sketch: draw every icon (use with -o)")
     args = ap.parse_args(argv)
 
     if args.icons or args.gallery:
@@ -36,8 +36,8 @@ def main(argv: list[str] | None = None) -> int:
     except (SpecError, OSError) as e:
         print(f"ERROR {e}", file=sys.stderr)
         return 2
-    kind = str(data.get("kind") or "arch").strip().lower()
-    if kind == "arch":
+    kind = str(data.get("kind") or "sketch").strip().lower()
+    if kind == "sketch":
         return arch_cli.main(argv)
 
     formats = [f.strip().lower() for f in (args.formats or "html,png").split(",") if f.strip()]

@@ -1,7 +1,7 @@
 # vis: Claude Code 가이드
 
 그림 스킬. 스킬은 `.claude/skills/vis/`, 명령은 `scripts/vis.py`. spec 의 `kind:` 로 종류를 고른다.
-- arch: `scripts/archdraw/` (만화풍 아키텍처, HTML·SVG·PNG)
+- sketch: `scripts/archdraw/` (만화풍 스케치, HTML·SVG·PNG)
 - xref·mindmap·graph: `scripts/visdraw/` (인터랙티브 HTML·PNG)
 
 ## 명령

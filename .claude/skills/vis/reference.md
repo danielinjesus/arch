@@ -1,9 +1,9 @@
 # Spec reference
 
-A spec is YAML (or JSON). `kind:` picks the picture: `arch` (default), `xref`, `mindmap` or `graph`.
-The arch format comes first; the other three are at the end.
+A spec is YAML (or JSON). `kind:` picks the picture: `sketch` (default), `xref`, `mindmap` or `graph`.
+The sketch format comes first; the other three are at the end.
 
-## arch
+## sketch
 
 Only `nodes` is required.
 
@@ -157,7 +157,7 @@ open: 2                                  # levels open at start (default: all)
 root:
   label: vis
   children:
-    - label: arch
+    - label: sketch
       note: shown in the side panel
       url: https://example.com           # a link in the side panel
       color: orange                      # first-level branches get a colour each; children inherit it

@@ -8,7 +8,7 @@ vis: pictures from a short spec
 
 One command draws four kinds of picture. The spec's kind: picks one.
 
-	arch      cartoon architecture diagram: core entities as icons, arrows that say what each does. HTML + SVG + PNG
+	sketch    cartoon sketch diagram: core entities as icons, arrows that say what each does. HTML + SVG + PNG
 	xref      categories down the side x tags across the top: matrix, relation graph, category tree, tag list. HTML + PNG
 	mindmap   collapsible tree, left to right, with notes and search. HTML + PNG
 	graph     network laid out by forces: drag, pan, zoom, click for links, hide groups. HTML + PNG
@@ -18,7 +18,7 @@ All HTML is one self-contained file (no CDN), light and dark, works at phone wid
 
 1. Pick the kind
 
-	- Parts of a system and what flows between them: arch
+	- Quick cartoon sketch of a repo or tool's parts: sketch
 	- One body of knowledge with a hierarchy (chapters) and cross-cutting labels (tags) that must be reviewed together: xref
 		- vertical knowledge = the category tree; horizontal knowledge = tags; the matrix and relation graph show the cross references
 	- An outline, a course map, a brainstorm with depth: mindmap
@@ -28,7 +28,7 @@ All HTML is one self-contained file (no CDN), light and dark, works at phone wid
 
 2. Understand the material first
 
-	- arch: read README, entry points, config, deploy files. For Azure: az resource list -g <group> -o table
+	- sketch: read README, entry points, config, deploy files.
 	- xref: take the categories from the source's own table of contents, then the tag groups, and write one line of criteria per tag (what counts, what does not). Notes on a link are the actual sentences, with their article number or page
 	- mindmap and graph: one short label per node. Detail goes in note:, not in the label
 	- Facts in labels and notes come from the source. Links (doc:, url:) are checked to exist before writing them
@@ -46,9 +46,9 @@ All HTML is one self-contained file (no CDN), light and dark, works at phone wid
 	python "${CLAUDE_SKILL_DIR}/scripts/vis.py" <spec> [-o path/name] [--formats html,png]
 
 	- Once per machine: pip install -r "${CLAUDE_SKILL_DIR}/scripts/requirements.txt"
-	- Writes <name>.html and <name>.png next to the spec (arch also writes .svg)
+	- Writes <name>.html and <name>.png next to the spec (sketch also writes .svg)
 	- The PNG needs Chrome, Edge or Chromium. Set VIS_BROWSER if it is not found
-	- arch only: --icons lists icons, --gallery draws them
+	- sketch only: --icons lists icons, --gallery draws them
 
 
 5. Look, then fix
@@ -56,7 +56,7 @@ All HTML is one self-contained file (no CDN), light and dark, works at phone wid
 	- Fix every WARN line (unknown key, tag with no link, node with no edge, edge through a node)
 	- Open the PNG with Read and check it as a reviewer would: nothing overlaps, labels readable, the point comes across in 3 seconds
 	- For the HTML kinds, also click through once: serve the folder with python -m http.server, open it in the browser tool, click a cell, a tag, a node, try search
-	- arch fixes, in order: shorter labels, merge minor nodes, pin col:, then layout: manual
+	- sketch fixes, in order: shorter labels, merge minor nodes, pin col:, then layout: manual
 	- xref: over about 25 tags makes the matrix wide. Merge tags or split the map
 	- Re-render until clean
 
@@ -70,7 +70,7 @@ All HTML is one self-contained file (no CDN), light and dark, works at phone wid
 7. Architecture diagrams go to the arch skill (2026-10-25)
 
 	- A real architecture or relationship diagram (start, end, groups, arrows, official icons, hover box, docs in a new tab) is drawn with C:\Users\aidan\.claude\skills\arch\SKILL.md
-	- kind: arch here is only a quick cartoon sketch of a repo. The cartoon look was an early improvisation, not a requirement
+	- kind: sketch here is only a quick cartoon sketch of a repo.
 
 
 Common mistakes
